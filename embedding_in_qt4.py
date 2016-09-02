@@ -124,6 +124,8 @@ class MyDynamicMplCanvas(MyMplCanvas):
                        self.n, self.mcas[5],
                        self.n, self.mcas[6], linewidth=0.5)
 
+        self.axes.set_xlim(540, 680)
+
         self.axes.grid()
         self.draw()
         self.c.computer_sum(self.mcas)

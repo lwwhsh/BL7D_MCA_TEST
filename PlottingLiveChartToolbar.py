@@ -47,7 +47,7 @@ class CustomMainWindow(QtGui.QMainWindow):
 
         # Define the geometry of the main window
         self.setGeometry(300, 300, 800, 400)
-        self.setWindowTitle("Plotting in Live Graph")
+        self.setWindowTitle("Plotting in Live Graph, Ver 0.1")
 
         # Place the QUIT sub menu in the File menu
         self.file_menu = QtGui.QMenu('&File', self)
@@ -227,12 +227,14 @@ def dataSendLoop(addData_callbackFunc):
     dxpMca1PV = epics.PV('BL7D:dxpXMAP:mca1')
     dxpAcqPV = epics.PV('BL7D:dxpXMAP:Acquiring', callback=onChanged)
 
+    '''
     while True:
         if i > 499:
             i = 0
         time.sleep(0.1)
         #mySrc.data_signal.emit(y[i])    # <- Here you emit a signal!
         #i += 1
+    '''
 
 
 if __name__ == '__main__':
