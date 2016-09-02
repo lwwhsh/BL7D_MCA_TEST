@@ -49,6 +49,12 @@ class CustomMainWindow(QtGui.QMainWindow):
         self.setGeometry(300, 300, 800, 400)
         self.setWindowTitle("Plotting in Live Graph")
 
+        # Place the QUIT sub menu in the File menu
+        self.file_menu = QtGui.QMenu('&File', self)
+        self.file_menu.addAction('&Quit', self.fileQuit,
+                                 QtCore.Qt.CTRL + QtCore.Qt.Key_Q)
+        self.menuBar().addMenu(self.file_menu)
+
         # Create FRAME_A
         self.FRAME_A = QtGui.QFrame(self)
         self.FRAME_A.setStyleSheet("QWidget { background-color: %s }"
@@ -58,7 +64,7 @@ class CustomMainWindow(QtGui.QMainWindow):
         self.setCentralWidget(self.FRAME_A)
 
         # Place the zoom button
-        self.zoomBtn = QtGui.QPushButton(text='zoom')
+        self.zoomBtn = QtGui.QPushButton(text='Fit...')
         setCustomSize(self.zoomBtn, 100, 50)
         self.zoomBtn.clicked.connect(self.zoomBtnAction)    # send signal.
         self.LAYOUT_A.addWidget(self.zoomBtn, *(0, 0))
@@ -66,6 +72,10 @@ class CustomMainWindow(QtGui.QMainWindow):
         # Place the matplotlib figure
         self.myFig = CustomFigCanvas()
         self.LAYOUT_A.addWidget(self.myFig, *(0, 1))
+
+        # Place the toolbar
+        self.navi_toolbar = NavigationToolbar(self.myFig, self.FRAME_A)
+        self.LAYOUT_A.addWidget(self.navi_toolbar, *(1, 1))
 
         # Add the callbackfunc to ..
         myDataLoop = threading.Thread(name   = 'myDataLoop',
@@ -81,11 +91,15 @@ class CustomMainWindow(QtGui.QMainWindow):
         print("zoom in")
         self.myFig.zoomIn(5)
 
-    ''''''
-
     def addData_callbackFunc(self, value):
         # print("Add data: " + str(value))
         self.myFig.addData(value)
+
+    def fileQuit(self):
+        self.close()
+
+    def closeEvent(self, ce):
+        self.fileQuit()
 
 
 ''' End Class '''
@@ -203,7 +217,7 @@ def dataSendLoop(addData_callbackFunc):
     i = 0
 
     def onChanged(pvname=None, value=None, char_value=None, **kw):
-        if char_value != '0':
+        if char_value != '0':  # 0=Acquiring, 1=Done.
             return
 
         mcas = []
@@ -216,7 +230,7 @@ def dataSendLoop(addData_callbackFunc):
     while True:
         if i > 499:
             i = 0
-        time.sleep(0.5)
+        time.sleep(0.1)
         #mySrc.data_signal.emit(y[i])    # <- Here you emit a signal!
         #i += 1
 

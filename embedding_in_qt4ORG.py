@@ -20,9 +20,15 @@ if use_pyside:
 else:
     from PyQt4 import QtGui, QtCore
 
-from numpy import arange, sin, pi
+from numpy import arange, sin, pi, linspace
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
+
+import epics
+import readline
+import time
+
 
 progname = os.path.basename(sys.argv[0])
 progversion = "0.1"
@@ -31,15 +37,16 @@ progversion = "0.1"
 class MyMplCanvas(FigureCanvas):
     """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
 
-    def __init__(self, parent=None, width=5, height=4, dpi=100):
+    def __init__(self, parent=None, width=5, height=4, dpi=200):
         fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = fig.add_subplot(111)
         # We want the axes cleared every time plot() is called
         self.axes.hold(False)
+        # TODO: is not working properly?
+        self.axes.grid()
 
         self.compute_initial_figure()
 
-        #
         FigureCanvas.__init__(self, fig)
         self.setParent(parent)
 
@@ -60,27 +67,73 @@ class MyStaticMplCanvas(MyMplCanvas):
         s = sin(2*pi*t)
         self.axes.plot(t, s)
 
+    def computer_sum(self, mcas):
+        sums = 0.0
+
+        for i in range(0, len(mcas)):
+            sums = sums + sum(mcas[i])
+
+        sums = sums / (i+1)
+        print 'sum: %d' %sums
+
 
 class MyDynamicMplCanvas(MyMplCanvas):
-    """A canvas that updates itself every second with a new plot."""
+    """A canvas that updates itself every Acquiring-PV with a new plot."""
 
     def __init__(self, *args, **kwargs):
         MyMplCanvas.__init__(self, *args, **kwargs)
-        timer = QtCore.QTimer(self)
-        timer.timeout.connect(self.update_figure)
-        timer.start(1000)
+        # timer = QtCore.QTimer(self)
+        # timer.timeout.connect(self.update_figure)
+        # timer.start(2000)
+        # -------------------------------------------------------------------
+        self.dxpMcaPVs = []
+        self.mcas = []
 
+        for i in range(1, 8, 1):
+            self.dxpMcaPVs.append(epics.PV('BL7D:dxpXMAP:mca' + str(i)))
 
+        self.dxpStartPV = epics.PV("BL7D:dxpXMAP:EraseStart")
+        self.dxpAcqPV = epics.PV('BL7D:dxpXMAP:Acquiring')
+
+        # TODO: how can update mca bins? it update self.xlim value
+        self.xlim = 2048
+        self.n = linspace(0, self.xlim - 1, self.xlim)
+        self.addCallbackAcq()
+
+        self.c = MyStaticMplCanvas()
 
     def compute_initial_figure(self):
         self.axes.plot([0, 1, 2, 3], [1, 2, 0, 4], 'r')
 
-    def update_figure(self):
-        # Build a list of 4 random integers between 0 and 10 (both inclusive)
-        l = [random.randint(0, 10) for i in range(4)]
+    # callback for get mca data.
+    def OnChanged(self, pvname=None, value=None, char_value=None, **kw):
+        if char_value != '0':
+            print 'Acquiring...', time.ctime()
+            return
 
-        self.axes.plot([0, 1, 2, 3], l, 'r')
+        self.mcas = []
+        for i in self.dxpMcaPVs :
+            self.mcas.append(i.get())
+
+        self.update_figure()
+
+    def addCallbackAcq(self):
+        # IMPORTANT: add_callback definition position. it define after callback function
+        self.dxpAcqPV.add_callback(self.OnChanged)
+
+    def update_figure(self):
+        # Build a list of all MCA integers between 0 to self.xlim length
+        # self.axes.plot(self.n, self.mcas[0], 'b-', self.n, self.mcas[1], 'r-', linewidth=0.5)
+        self.axes.plot(self.n, self.mcas[0],
+                       self.n, self.mcas[1],
+                       self.n, self.mcas[2],
+                       self.n, self.mcas[3],
+                       self.n, self.mcas[4],
+                       self.n, self.mcas[5],
+                       self.n, self.mcas[6], linewidth=0.5)
+
         self.draw()
+        self.c.computer_sum(self.mcas)
 
 
 class ApplicationWindow(QtGui.QMainWindow):
@@ -103,8 +156,8 @@ class ApplicationWindow(QtGui.QMainWindow):
         self.main_widget = QtGui.QWidget(self)
 
         l = QtGui.QVBoxLayout(self.main_widget)
-        sc = MyStaticMplCanvas(self.main_widget, width=5, height=4, dpi=100)
-        dc = MyDynamicMplCanvas(self.main_widget, width=5, height=4, dpi=100)
+        sc = MyStaticMplCanvas(self.main_widget, width=5, height=4, dpi=80)
+        dc = MyDynamicMplCanvas(self.main_widget, width=5, height=4, dpi=80)
         l.addWidget(sc)
         l.addWidget(dc)
 
@@ -122,20 +175,20 @@ class ApplicationWindow(QtGui.QMainWindow):
     def about(self):
         QtGui.QMessageBox.about(self, "About",
                                 """embedding_in_qt4.py example
-Copyright 2005 Florent Rougon, 2006 Darren Dale
+Copyright 2016 WoulWoo Lee
 
-This program is a simple example of a Qt4 application embedding matplotlib
-canvases.
+This program is a simple mca monitoring of DXP detector example.
+use Qt4 application embedding matplotlib canvases.
 
 It may be used and modified with no restriction; raw copies as well as
 modified versions may be distributed without limitation."""
                                 )
 
+if __name__ == '__main__':
+   qApp = QtGui.QApplication(sys.argv)
 
-qApp = QtGui.QApplication(sys.argv)
-
-aw = ApplicationWindow()
-aw.setWindowTitle("%s" % progname)
-aw.show()
-sys.exit(qApp.exec_())
-#qApp.exec_()
+   aw = ApplicationWindow()
+   aw.setWindowTitle("%s Ver %s" %(progname, progversion))
+   aw.show()
+   sys.exit(qApp.exec_())
+   # qApp.exec_()

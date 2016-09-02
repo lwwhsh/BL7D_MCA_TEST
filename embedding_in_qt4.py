@@ -1,13 +1,7 @@
 #!/usr/bin/env python
 
 # embedding_in_qt4.py --- Simple Qt4 application embedding matplotlib canvases
-#
-# Copyright (C) 2005 Florent Rougon
-#               2006 Darren Dale
-#
-# This file is an example program for matplotlib. It may be used and
-# modified with no restriction; raw copies as well as modified versions
-# may be distributed without limitation.
+
 
 from __future__ import unicode_literals
 import sys
@@ -19,12 +13,10 @@ if use_pyside:
     from PySide import QtGui, QtCore
 else:
     from PyQt4 import QtGui, QtCore
-
 from numpy import arange, sin, pi, linspace
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
-
 import epics
 import readline
 import time
@@ -42,6 +34,8 @@ class MyMplCanvas(FigureCanvas):
         self.axes = fig.add_subplot(111)
         # We want the axes cleared every time plot() is called
         self.axes.hold(False)
+        # TODO: is not working properly?
+        self.axes.grid()
 
         self.compute_initial_figure()
 
@@ -101,7 +95,7 @@ class MyDynamicMplCanvas(MyMplCanvas):
         self.c = MyStaticMplCanvas()
 
     def compute_initial_figure(self):
-        self.axes.plot([0, 1, 2, 3], [1, 2, 0, 4], 'r')
+        pass # self.axes.plot([0, 1, 2, 3], [1, 2, 0, 4], 'r')
 
     # callback for get mca data.
     def OnChanged(self, pvname=None, value=None, char_value=None, **kw):
@@ -130,6 +124,7 @@ class MyDynamicMplCanvas(MyMplCanvas):
                        self.n, self.mcas[5],
                        self.n, self.mcas[6], linewidth=0.5)
 
+        self.axes.grid()
         self.draw()
         self.c.computer_sum(self.mcas)
 
@@ -158,6 +153,11 @@ class ApplicationWindow(QtGui.QMainWindow):
         dc = MyDynamicMplCanvas(self.main_widget, width=5, height=4, dpi=80)
         l.addWidget(sc)
         l.addWidget(dc)
+
+        # Place the toolbar
+        self.navi_toolbar = NavigationToolbar(dc, self.main_widget)
+        # if use grid_layout use like this, self.LAYOUT_A.addWidget(self.navi_toolbar, *(1, 1))
+        l.addWidget(self.navi_toolbar)
 
         self.main_widget.setFocus()
         self.setCentralWidget(self.main_widget)
