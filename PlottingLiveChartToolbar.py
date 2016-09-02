@@ -106,6 +106,7 @@ class CustomFigCanvas(FigureCanvas, TimedAnimation):
         # The window
         self.fig = Figure(figsize=(5,5), dpi=75)
         self.ax1 = self.fig.add_subplot(111)
+
         self.ax1.grid()
         self.ax1.hold(False)
 
@@ -118,7 +119,6 @@ class CustomFigCanvas(FigureCanvas, TimedAnimation):
         self.ax1.add_line(self.line1)
         self.ax1.add_line(self.line1_tail)
         self.ax1.add_line(self.line1_head)
-        # use if fixied limit.
         #self.ax1.set_xlim(0, self.xlim - 1)
         #self.ax1.set_ylim(30500, 32000)
 
