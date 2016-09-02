@@ -93,7 +93,7 @@ class CustomMainWindow(QtGui.QMainWindow):
     def addData_callbackFunc(self, value):
         # print("Add data: " + str(value))
         self.myFig.addData(value)
-        time.sleep(1)
+        time.sleep(0.5)
         epics.caput('BL7D:dxpXMAP:EraseStart', 1)
 
 
