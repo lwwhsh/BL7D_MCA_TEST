@@ -88,13 +88,12 @@ class CustomMainWindow(QtGui.QMainWindow):
     ''''''
 
     def zoomBtnAction(self):
-        print("zoom in")
         self.myFig.zoomIn(5)
 
     def addData_callbackFunc(self, value):
         # print("Add data: " + str(value))
         self.myFig.addData(value)
-
+        time.sleep(1)
         epics.caput('BL7D:dxpXMAP:EraseStart', 1)
 
 
@@ -225,12 +224,10 @@ def dataSendLoop(addData_callbackFunc):
 
         mcas = []
         mcas = dxpMca1PV.get()
-        time.sleep(0.2)
         mySrc.data_signal.emit(sum(mcas))
 
     dxpMca1PV = epics.PV('BL7D:dxpXMAP:mca1')
     dxpAcqPV = epics.PV('BL7D:dxpXMAP:Acquiring', callback=onChanged)
-    #dxpEraseStartPV =  epics.PV('BL7D:dxpXMAP:EraseStart')
 
     '''while True:
         if onChangedSignal is 1:
