@@ -102,7 +102,6 @@ class MyDynamicMplCanvas(MyMplCanvas):
         if char_value != '0':
             print 'Acquiring...', time.ctime()
             return
-
         self.mcas = []
         for i in self.dxpMcaPVs :
             self.mcas.append(i.get())
@@ -125,7 +124,6 @@ class MyDynamicMplCanvas(MyMplCanvas):
                        self.n, self.mcas[6], linewidth=0.5)
 
         self.axes.set_xlim(540, 680)
-
         self.axes.grid()
         self.draw()
         self.c.computer_sum(self.mcas)

@@ -95,6 +95,9 @@ class CustomMainWindow(QtGui.QMainWindow):
         # print("Add data: " + str(value))
         self.myFig.addData(value)
 
+        epics.caput('BL7D:dxpXMAP:EraseStart', 1)
+
+
     def fileQuit(self):
         self.close()
 
@@ -222,16 +225,17 @@ def dataSendLoop(addData_callbackFunc):
 
         mcas = []
         mcas = dxpMca1PV.get()
+        time.sleep(0.2)
         mySrc.data_signal.emit(sum(mcas))
 
     dxpMca1PV = epics.PV('BL7D:dxpXMAP:mca1')
     dxpAcqPV = epics.PV('BL7D:dxpXMAP:Acquiring', callback=onChanged)
+    #dxpEraseStartPV =  epics.PV('BL7D:dxpXMAP:EraseStart')
 
-    '''
-    while True:
-        if i > 499:
-            i = 0
-        time.sleep(0.1)
+    '''while True:
+        if onChangedSignal is 1:
+            time.sleep(0.1)
+
         #mySrc.data_signal.emit(y[i])    # <- Here you emit a signal!
         #i += 1
     '''
