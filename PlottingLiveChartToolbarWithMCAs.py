@@ -94,9 +94,6 @@ class CustomMainWindow(QtGui.QMainWindow):
     def addData_callbackFunc(self, value):
         # print("Add data: " + str(value))
         self.myFig.addData(value)
-        # time.sleep(0.5)
-        # epics.caput('BL7D:dxpXMAP:EraseStart', 1)
-
 
     def fileQuit(self):
         self.close()
@@ -118,7 +115,6 @@ class CustomFigCanvas(FigureCanvas, TimedAnimation):
         # The data
         self.xlim = 2048
         self.n = np.linspace(0, self.xlim - 1, self.xlim)
-        # self.y = (self.n * 0.0) + 50
         self.y = epics.caget("BL7D:dxpXMAP:mca1")
 
         # The window
@@ -245,15 +241,12 @@ def dataSendLoop(addData_callbackFunc):
 
     while True:
         if onChangedSignal is 1:
-            mySrc.data_signal.emit(mcas)
+            mySrc.data_signal.emit(mcas)  # <- Here you emit a signal!
             onChangedSignal = 0
             time.sleep(1.0)
             epics.caput('BL7D:dxpXMAP:EraseStart', 1)
 
         time.sleep(0.02)
-
-        #mySrc.data_signal.emit(y[i])    # <- Here you emit a signal!
-        #i += 1
 
 
 if __name__ == '__main__':
