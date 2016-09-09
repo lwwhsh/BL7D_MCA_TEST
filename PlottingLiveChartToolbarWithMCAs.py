@@ -118,7 +118,8 @@ class CustomFigCanvas(FigureCanvas, TimedAnimation):
         # The data
         self.xlim = 2048
         self.n = np.linspace(0, self.xlim - 1, self.xlim)
-        self.y = (self.n * 0.0) + 50
+        # self.y = (self.n * 0.0) + 50
+        self.y = epics.caget("BL7D:dxpXMAP:mca1")
 
         # The window
         self.fig = Figure(figsize=(5,5), dpi=75)
@@ -154,12 +155,6 @@ class CustomFigCanvas(FigureCanvas, TimedAnimation):
         self.addedData.append(value)
 
     def zoomIn(self, value):
-        #bottom = self.ax1.get_ylim()[0]
-        #top = self.ax1.get_ylim()[1]
-        #bottom += value
-        #top -= value
-        #self.ax1.set_ylim(bottom,top)
-
         self.ax1.relim()
         self.ax1.set_autoscale_on(True)
         # self.ax1.autoscale_view(True)
@@ -215,9 +210,9 @@ def dataSendLoop(addData_callbackFunc):
     mySrc.data_signal.connect(addData_callbackFunc)
 
     # Simulate some data
-    n = np.linspace(0, 499, 500)
-    y = 50 + 25*(np.sin(n / 8.3)) + 10*(np.sin(n / 7.5)) - 5*(np.sin(n / 1.5))
-    i = 0
+    # n = np.linspace(0, 499, 500)
+    # y = 50 + 25*(np.sin(n / 8.3)) + 10*(np.sin(n / 7.5)) - 5*(np.sin(n / 1.5))
+    # i = 0
 
     dxpMcaPVs = []
     for i in range(1, 8, 1):
@@ -237,7 +232,6 @@ def dataSendLoop(addData_callbackFunc):
 
         mySrc.data_signal.emit(mcas)
 
-    dxpMca1PV = epics.PV('BL7D:dxpXMAP:mca1')
     dxpAcqPV  = epics.PV('BL7D:dxpXMAP:Acquiring', callback=onChanged)
 
     '''while True:
