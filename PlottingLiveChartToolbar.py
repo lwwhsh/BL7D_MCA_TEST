@@ -227,7 +227,7 @@ def dataSendLoop(addData_callbackFunc):
         mySrc.data_signal.emit(sum(mcas))
 
     dxpMca1PV = epics.PV('BL7D:dxpXMAP:mca1')
-    dxpAcqPV = epics.PV('BL7D:dxpXMAP:Acquiring', callback=onChanged)
+    dxpAcqPV  = epics.PV('BL7D:dxpXMAP:Acquiring', callback=onChanged)
 
     '''while True:
         if onChangedSignal is 1:
