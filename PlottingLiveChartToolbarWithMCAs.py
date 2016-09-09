@@ -94,8 +94,8 @@ class CustomMainWindow(QtGui.QMainWindow):
     def addData_callbackFunc(self, value):
         # print("Add data: " + str(value))
         self.myFig.addData(value)
-        time.sleep(0.5)
-        epics.caput('BL7D:dxpXMAP:EraseStart', 1)
+        # time.sleep(0.5)
+        # epics.caput('BL7D:dxpXMAP:EraseStart', 1)
 
 
     def fileQuit(self):
@@ -137,8 +137,6 @@ class CustomFigCanvas(FigureCanvas, TimedAnimation):
         self.ax1.add_line(self.line1)
         self.ax1.add_line(self.line1_tail)
         self.ax1.add_line(self.line1_head)
-        #self.ax1.set_xlim(0, self.xlim - 1)
-        #self.ax1.set_ylim(30500, 32000)
 
         FigureCanvas.__init__(self, self.fig)
         TimedAnimation.__init__(self, self.fig, interval=100, blit=True)
@@ -157,7 +155,6 @@ class CustomFigCanvas(FigureCanvas, TimedAnimation):
     def zoomIn(self, value):
         self.ax1.relim()
         self.ax1.set_autoscale_on(True)
-        # self.ax1.autoscale_view(True)
         self.ax1.autoscale(enable=True, axis='both', tight=True)
         self.ax1.autoscale_view(tight=True, scalex=True, scaley=True)
 
@@ -204,43 +201,59 @@ class Communicate(QtCore.QObject):
 ''' End Class '''
 
 
+onChangedSignal = 0
+mcas = 0.0
+
+dxpMcaPVs = []
+for i in range(1, 8, 1):
+    dxpMcaPVs.append(epics.PV('BL7D:dxpXMAP:mca' + str(i)))
+
+
+def onChanged(pvname=None, value=None, char_value=None, **kw):
+    global onChangedSignal, mcas, dxpMcaPV
+
+    if char_value != '0':  # 0=Acquiring, 1=Done.
+        print('Acquiring... ', time.ctime())
+        onChangedSignal = 0
+        return
+
+    mcas = 0.0
+    for i in dxpMcaPVs:
+        mcas = mcas + sum(i.get())
+
+    mcas = (mcas / dxpMcaPVs.__len__())
+    print("MCAs Average... ", mcas)
+
+    onChangedSignal = 1
+
+    # mySrc.data_signal.emit(mcas)
+
+
 def dataSendLoop(addData_callbackFunc):
+    global onChangedSignal, mcas, dxpMcaPV
+
     # Setup the signal-slot mechanism.
     mySrc = Communicate()
     mySrc.data_signal.connect(addData_callbackFunc)
 
-    # Simulate some data
-    # n = np.linspace(0, 499, 500)
-    # y = 50 + 25*(np.sin(n / 8.3)) + 10*(np.sin(n / 7.5)) - 5*(np.sin(n / 1.5))
-    # i = 0
-
-    dxpMcaPVs = []
-    for i in range(1, 8, 1):
-        dxpMcaPVs.append(epics.PV('BL7D:dxpXMAP:mca' + str(i)))
-
-    def onChanged(pvname=None, value=None, char_value=None, **kw):
-        if char_value != '0':  # 0=Acquiring, 1=Done.
-            print('Acquiring... ', time.ctime())
-            return
-
-        mcas = 0.0
-        for i in dxpMcaPVs:
-            mcas = mcas + sum(i.get())
-
-        mcas = (mcas/dxpMcaPVs.__len__())
-        print("MCAs Average... ", mcas)
-
-        mySrc.data_signal.emit(mcas)
+    onChangedSignal = 0
+    mcas = 0.0
+    epics.caput('BL7D:dxpXMAP:EraseStart', 1)
 
     dxpAcqPV  = epics.PV('BL7D:dxpXMAP:Acquiring', callback=onChanged)
+    epics.caput('BL7D:dxpXMAP:EraseStart', 1)
 
-    '''while True:
+    while True:
         if onChangedSignal is 1:
-            time.sleep(0.1)
+            mySrc.data_signal.emit(mcas)
+            onChangedSignal = 0
+            time.sleep(1.0)
+            epics.caput('BL7D:dxpXMAP:EraseStart', 1)
+
+        time.sleep(0.02)
 
         #mySrc.data_signal.emit(y[i])    # <- Here you emit a signal!
         #i += 1
-    '''
 
 
 if __name__ == '__main__':
