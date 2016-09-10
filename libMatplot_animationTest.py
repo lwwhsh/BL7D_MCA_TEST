@@ -51,5 +51,4 @@ scope = Scope(ax)
 ani = animation.FuncAnimation(fig, scope.update, emitter, interval=10,
                               blit=True)
 
-
 plt.show()
