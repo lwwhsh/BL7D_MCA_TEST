@@ -214,10 +214,13 @@ def onChanged(pvname=None, value=None, char_value=None, **kw):
         return
 
     mcas = 0.0
+    '''
     for i in dxpMcaPVs:
         mcas = mcas + sum(i.get())
 
     mcas = (mcas / dxpMcaPVs.__len__())
+    '''
+    mcas = sum(dxpMcaPVs[0].get())
     print("MCAs Average... ", mcas)
 
     onChangedSignal = 1
