@@ -3,6 +3,7 @@ Emulate an oscilloscope.  Requires the animation API introduced in
 matplotlib 1.0 SVN.
 """
 import numpy as np
+import matplotlib
 from matplotlib.lines import Line2D
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -10,6 +11,7 @@ import matplotlib.animation as animation
 
 class Scope(object):
     def __init__(self, ax, maxt=2, dt=0.02):
+        print('matplotlib version: ', matplotlib.__version__)
         self.ax = ax
         self.dt = dt
         self.maxt = maxt
@@ -48,6 +50,7 @@ fig, ax = plt.subplots()
 scope = Scope(ax)
 
 # pass a generator in "emitter" to produce data for the update func
+# animation.FuncAnimation(fig, func, frames=None, init_func=None, fargs=None, save_count=None, **kwargs)
 ani = animation.FuncAnimation(fig, scope.update, emitter, interval=10,
                               blit=True)
 
