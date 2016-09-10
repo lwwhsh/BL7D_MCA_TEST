@@ -40,7 +40,7 @@ def emitter(p=0.03):
     while True:
         v = np.random.rand(1)
         if v > p:
-            yield v # 0.
+            yield 0.
         else:
             yield np.random.rand(1)
 
