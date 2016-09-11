@@ -23,7 +23,7 @@ class Scope(object):
         self.ydata = [0]
         self.line = Line2D(self.tdata, self.ydata)
         self.ax.add_line(self.line)
-        self.ax.set_ylim(-.1, 1.1)
+        self.ax.set_ylim(-.1, 50000.0)
         self.ax.set_xlim(0, self.maxt)
 
     def update(self, y):
@@ -67,14 +67,10 @@ def emitter():
             mcas = sum(dxpMca1PV.get())
             oldAcqStatus = nowAcqStatus
             yield mcas
+
         else:
             oldAcqStatus = nowAcqStatus
             yield mcas
-
-        # else:
-        #     yield mcas
-        # time.sleep(0.05)
-
 
 fig, ax = plt.subplots()
 scope = Scope(ax)
