@@ -99,7 +99,7 @@ class MyDynamicMplCanvas(MyMplCanvas):
 
     # callback for get mca data.
     def OnChanged(self, pvname=None, value=None, char_value=None, **kw):
-        if char_value != '0':
+        if value is 1: # value 1=Acquiring, 0=Done
             print 'Acquiring...', time.ctime()
             return
         self.mcas = []
