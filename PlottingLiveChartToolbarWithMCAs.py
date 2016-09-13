@@ -208,8 +208,7 @@ for i in range(1, 8, 1):
 
 def onChanged(pvname=None, value=None, char_value=None, **kw):
     global onChangedSignal, mcas, dxpMcaPV
-
-    if char_value != '0':  # 0=Acquiring, 1=Done.
+    if value is 1:  # 1=Acquiring, 0=Done.
         print('Acquiring... ', time.ctime())
         onChangedSignal = 0
         return
