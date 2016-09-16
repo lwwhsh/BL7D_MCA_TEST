@@ -17,6 +17,7 @@ import matplotlib.backends.backend_qt4agg
 import readline
 import epics
 import time
+import os
 
 
 progname = os.path.basename(sys.argv[0])
@@ -51,9 +52,12 @@ class MainWindow(QMainWindow):
     sliders_grid = QGridLayout(sliders)
 
     self.dxpAcqPV  = epics.PV('BL7D:dxpXMAP:Acquiring')
-    self.dxpMca1PV = epics.PV('BL7D:dxpXMAP:mca1')
-    self.dxpMca2PV = epics.PV('BL7D:dxpXMAP:mca2')
-    self.dxpMca3PV = epics.PV('BL7D:dxpXMAP:mca3')
+
+    self.dxpMcaPVs = []
+    self.NoOfElement = 7
+
+    for i in range(1, 8, 1):
+      self.dxpMcaPVs.append(epics.PV('BL7D:dxpXMAP:mca' + str(i)))
 
     self.plot()
     self.addCallbackAcq()
@@ -72,12 +76,26 @@ class MainWindow(QMainWindow):
 
   def plot(self):
     self.drawing.hold(False)
-    s = self.dxpMca1PV.get()
-    c = self.dxpMca2PV.get()
-    b = self.dxpMca3PV.get()
-    print('Average: %d ') %sum((s+c+b) / 3)
 
-    self.drawing.plot(self.x, s, 'r', self.x, c, 'g', self.x, b, 'b')
+    self.mcas = []
+    avgMca = 0.0
+
+    for i in self.dxpMcaPVs :
+       self.mcas.append(i.get())
+    for i in range(0, 7, 1) :
+       avgMca = avgMca + sum(self.mcas[i])
+
+    print('Average: %d ') %(avgMca / self.NoOfElement)
+
+    # self.drawing.plot(self.x, s, 'r', self.x, c, 'g', self.x, b, 'b')
+    self.drawing.plot(self.x, self.mcas[0],
+                      self.x, self.mcas[1],
+                      self.x, self.mcas[2],
+                      self.x, self.mcas[3],
+                      self.x, self.mcas[4],
+                      self.x, self.mcas[5],
+                      self.x, self.mcas[6], linewidth=1.0)
+
     self.drawing.set_ylim(0, 2500)
     self.drawing.set_xlim(550, 680) # TODO : please implement zoom in / zoom out.
     self.drawing.grid()
