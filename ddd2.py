@@ -19,18 +19,19 @@ import epics
 import time
 
 
+progname = os.path.basename(sys.argv[0])
+progversion = "0.1"
+
+
 class MainWindow(QMainWindow):
 
   # TODO: How can change max bins(energy) value.
   # define X axis for mca bins
   x = numpy.arange(0, 2048, 1)
 
-  cos = 0
-  sin = 0
-
-  # add LWW
   # define and initialise signal for mca Done callback signal
-  commSignal = QtCore.pyqtSignal(object)
+  # commSignal = QtCore.pyqtSignal(object)
+  commSignal = QtCore.Signal()
 
   def __init__(self):
     QMainWindow.__init__(self)
@@ -59,10 +60,11 @@ class MainWindow(QMainWindow):
 
   def onChanged(self, pvname=None, value=None, char_value=None, **kw):
       # print('onChanged: '), char_value, time.ctime()
-      if value is 1 : # value 1=Acquiring, 0=Done
+      # value 1=Acquiring, 0=Done
+      if value is 1 :
           return
-      # self.plot()
-      self.commSignal.emit(self.plot)
+      # self.commSignal.emit(self.plot) # emit the signal
+      self.commSignal.emit()  # emit the signal
 
   def addCallbackAcq(self):
       # IMPORTANT: add_callback definition position. it define after callback function
@@ -77,7 +79,7 @@ class MainWindow(QMainWindow):
 
     self.drawing.plot(self.x, s, 'r', self.x, c, 'g', self.x, b, 'b')
     self.drawing.set_ylim(0, 2500)
-    self.drawing.set_xlim(550, 680) # Todo : please implement zoom in / zoom out.
+    self.drawing.set_xlim(550, 680) # TODO : please implement zoom in / zoom out.
     self.drawing.grid()
     self.canvas.draw()
 
