@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys
+import sys, os
 
 ## namespace organization changed in PyQt5 but the class name was kept.
 ## importing this way makes it easier to change to PyQt5 later
 from PyQt4.QtGui import (QMainWindow, QApplication, QDockWidget, QWidget,
-                         QGridLayout, QSlider)
+                         QGridLayout, QSlider, QCheckBox)
 from PyQt4.QtCore import Qt
 from PyQt4 import QtCore
 
@@ -17,7 +17,6 @@ import matplotlib.backends.backend_qt4agg
 import readline
 import epics
 import time
-import os
 
 
 progname = os.path.basename(sys.argv[0])
@@ -51,6 +50,15 @@ class MainWindow(QMainWindow):
     sliders = QWidget()
     sliders_grid = QGridLayout(sliders)
 
+    chkRepeaterRun = QCheckBox("&Repeater...")
+    chkRepeaterRun.setFocusPolicy(Qt.NoFocus)
+
+    sliders_grid.addWidget(chkRepeaterRun,0,0)
+
+    dock.setWidget(sliders)
+    #-----------------------------------------------------------------
+
+
     self.dxpAcqPV  = epics.PV('BL7D:dxpXMAP:Acquiring')
 
     self.dxpMcaPVs = []
@@ -67,6 +75,7 @@ class MainWindow(QMainWindow):
       # value 1=Acquiring, 0=Done
       if value is 1 :
           return
+
       # self.commSignal.emit(self.plot) # emit the signal
       self.commSignal.emit()  # emit the signal
 
@@ -83,17 +92,14 @@ class MainWindow(QMainWindow):
     for i in self.dxpMcaPVs :
        mcas.append(i.get())
     for i in range(0, self.NoOfElement, 1) :
-       avgMca = avgMca + sum(mcas[i])
+       avgMca = avgMca + sum(mcas[i][560:630])
 
-    print('Average: %d ') %(avgMca / self.NoOfElement)
+    print('Average: %d ') %(avgMca / self.NoOfElement), time.ctime()
 
     # TODO : please implement zoom in / zoom out.
-    self.drawing.plot(self.x, mcas[0],
-                      self.x, mcas[1],
-                      self.x, mcas[2],
-                      self.x, mcas[3],
-                      self.x, mcas[4],
-                      self.x, mcas[5],
+    self.drawing.plot(self.x, mcas[0], self.x, mcas[1],
+                      self.x, mcas[2], self.x, mcas[3],
+                      self.x, mcas[4], self.x, mcas[5],
                       self.x, mcas[6], linewidth=1.0)
 
     self.drawing.set_ylim(0, 2500)
