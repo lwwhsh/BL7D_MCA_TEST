@@ -95,7 +95,7 @@ class MyDynamicMplCanvas(MyMplCanvas):
         self.c = MyStaticMplCanvas()
 
     def compute_initial_figure(self):
-        pass # self.axes.plot([0, 1, 2, 3], [1, 2, 0, 4], 'r')
+        pass
 
     # callback for get mca data.
     def OnChanged(self, pvname=None, value=None, char_value=None, **kw):
