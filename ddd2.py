@@ -77,27 +77,27 @@ class MainWindow(QMainWindow):
   def plot(self):
     self.drawing.hold(False)
 
-    self.mcas = []
+    mcas = []
     avgMca = 0.0
 
     for i in self.dxpMcaPVs :
-       self.mcas.append(i.get())
-    for i in range(0, 7, 1) :
-       avgMca = avgMca + sum(self.mcas[i])
+       mcas.append(i.get())
+    for i in range(0, self.NoOfElement, 1) :
+       avgMca = avgMca + sum(mcas[i])
 
     print('Average: %d ') %(avgMca / self.NoOfElement)
 
-    # self.drawing.plot(self.x, s, 'r', self.x, c, 'g', self.x, b, 'b')
-    self.drawing.plot(self.x, self.mcas[0],
-                      self.x, self.mcas[1],
-                      self.x, self.mcas[2],
-                      self.x, self.mcas[3],
-                      self.x, self.mcas[4],
-                      self.x, self.mcas[5],
-                      self.x, self.mcas[6], linewidth=1.0)
+    # TODO : please implement zoom in / zoom out.
+    self.drawing.plot(self.x, mcas[0],
+                      self.x, mcas[1],
+                      self.x, mcas[2],
+                      self.x, mcas[3],
+                      self.x, mcas[4],
+                      self.x, mcas[5],
+                      self.x, mcas[6], linewidth=1.0)
 
     self.drawing.set_ylim(0, 2500)
-    self.drawing.set_xlim(550, 680) # TODO : please implement zoom in / zoom out.
+    self.drawing.set_xlim(550, 680)
     self.drawing.grid()
     self.canvas.draw()
 
