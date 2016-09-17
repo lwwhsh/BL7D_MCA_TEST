@@ -6,7 +6,8 @@ import sys, os
 ## namespace organization changed in PyQt5 but the class name was kept.
 ## importing this way makes it easier to change to PyQt5 later
 from PyQt4.QtGui import (QMainWindow, QApplication, QDockWidget, QWidget,
-                         QGridLayout, QSlider, QCheckBox)
+                         QGridLayout, QSlider, QCheckBox, QLabel, QLineEdit,
+                         QIntValidator)
 from PyQt4.QtCore import Qt
 from PyQt4 import QtCore
 
@@ -52,8 +53,15 @@ class MainWindow(QMainWindow):
 
     chkRepeaterRun = QCheckBox("&Repeater...")
     chkRepeaterRun.setFocusPolicy(Qt.NoFocus)
-
     sliders_grid.addWidget(chkRepeaterRun,0,0)
+
+    self.lowROI  = QLineEdit()
+    self.lowROI.setValidator(QIntValidator(0, 2047))
+    self.highROI = QLineEdit()
+    self.highROI.setValidator(QIntValidator(0, 2047))
+    sliders_grid.addWidget(self.lowROI,  1, 0)
+    sliders_grid.addWidget(self.highROI, 2, 0)
+
 
     dock.setWidget(sliders)
     #-----------------------------------------------------------------
@@ -62,10 +70,10 @@ class MainWindow(QMainWindow):
     self.dxpAcqPV  = epics.PV('BL7D:dxpXMAP:Acquiring')
 
     self.dxpMcaPVs = []
-    self.NoOfElement = 7
+    self.noOfElement = 7
 
-    for i in range(1, 8, 1):
-      self.dxpMcaPVs.append(epics.PV('BL7D:dxpXMAP:mca' + str(i)))
+    for i in range(1, self.noOfElement+1, 1) :
+       self.dxpMcaPVs.append(epics.PV('BL7D:dxpXMAP:mca' + str(i)))
 
     self.plot()
     self.addCallbackAcq()
@@ -91,10 +99,10 @@ class MainWindow(QMainWindow):
 
     for i in self.dxpMcaPVs :
        mcas.append(i.get())
-    for i in range(0, self.NoOfElement, 1) :
+    for i in range(0, self.noOfElement, 1) :
        avgMca = avgMca + sum(mcas[i][560:630])
 
-    print('Average: %d ') %(avgMca / self.NoOfElement), time.ctime()
+    print('Average: %d ') %(avgMca / self.noOfElement), time.ctime()
 
     # TODO : please implement zoom in / zoom out.
     self.drawing.plot(self.x, mcas[0], self.x, mcas[1],
