@@ -53,6 +53,9 @@ class SnaptoCursor(object):
         # text location in axes coords
         self.txt = ax.text(0.7, 0.9, '', transform=ax.transAxes)
 
+        self.ly2 = ax.axvline(color='r', linewidth=2.0)  # the vertical line
+        self.ly2.set_xdata(x=0.5)
+
     def mouse_move(self, event):
 
         if not event.inaxes:
@@ -68,7 +71,7 @@ class SnaptoCursor(object):
         self.ly.set_xdata(x)
 
         self.txt.set_text('x=%1.2f, y=%1.2f' % (x, y))
-        print('x=%1.2f, y=%1.2f' % (x, y))
+        # print('x=%1.2f, y=%1.2f' % (x, y))
         plt.draw()
 
 t = np.arange(0.0, 1.0, 0.01)
