@@ -13,6 +13,10 @@ from PyQt4 import QtCore
 
 import numpy
 import matplotlib.pyplot
+
+#test1
+from matplotlib import pyplot as plt
+
 import matplotlib.backends.backend_qt4agg
 
 import readline
@@ -24,7 +28,7 @@ progname = os.path.basename(sys.argv[0])
 progversion = "0.1"
 
 
-class Point(object):
+class Point:
     def __init__(self, ax, pos, callback=None):
         self.callback = callback
         self.line = ax.axvline(pos, ls="--", c="k")
@@ -59,8 +63,8 @@ class MainWindow(QMainWindow):
 
     # TODO: How can change max bins(energy) value.
     # define X axis for mca bins
-    x = numpy.arange(0, 2048, 1)
     maxBins = 2048
+    x = numpy.arange(0, maxBins, 1)
 
     # define and initialise signal for mca Done callback signal
     # commSignal = QtCore.pyqtSignal(object)
@@ -71,8 +75,15 @@ class MainWindow(QMainWindow):
 
         self.commSignal.connect(self.plot)
 
-        self.figure  = matplotlib.pyplot.figure()
+        # self.figure  = matplotlib.pyplot.figure()
+        # test1
+        self.figure = plt.figure()
+
         self.drawing = self.figure.add_subplot(111)
+
+        #test1
+        self.drawing.axvline(599, ls="--", c="r", lw=2)
+
         self.canvas  = matplotlib.backends.backend_qt4agg.FigureCanvasQTAgg(self.figure)
 
         self.setCentralWidget(self.canvas)
@@ -100,8 +111,8 @@ class MainWindow(QMainWindow):
 
         dock.setWidget(sliders)
 
-        self.a = Point(self.figure, self.maxBins/4, self.callback)
-        self.b = Point(self.figure, self.maxBins/2, self.callback)
+        #self.a = Point(self.figure, self.maxBins/4, self.callback)
+        #self.b = Point(self.figure, self.maxBins/2, self.callback)
 
         #-----------------------------------------------------------------
 
@@ -151,6 +162,10 @@ class MainWindow(QMainWindow):
 
         self.drawing.set_ylim(0, 2500)
         self.drawing.set_xlim(550, 680)
+
+        # test1
+        self.drawing.axvline(599, ls="--", c="r", lw=2)
+
         self.drawing.grid()
         self.canvas.draw()
 
