@@ -45,6 +45,7 @@ if __name__ == '__main__':
 
     circles = [patches.Circle((0.32, 0.3), 0.2, fc='r', alpha=0.5),
                patches.Circle((0.3, 0.3), 0.2, fc='b', alpha=0.5)]
+
     for circ in circles:
         ax.add_patch(circ)
 
