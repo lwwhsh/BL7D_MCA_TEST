@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import matplotlib.pyplot as plt
 import numpy as np
 import time
@@ -32,8 +33,8 @@ class DynamicUpdate():
         self.figure.canvas.flush_events()
 
     # Example
-    # def __call__(self):
-    def __init__(self):
+    def __call__(self):
+    # def __init__(self):
         self.on_launch()
         xdata = []
         ydata = []
@@ -41,7 +42,7 @@ class DynamicUpdate():
             xdata.append(x)
             ydata.append(np.exp(-x**2)+10*np.exp(-(x-7)**2))
             self.on_running(xdata, ydata)
-            time.sleep(1)
+            time.sleep(.1)
         return xdata, ydata
 
 d = DynamicUpdate()
