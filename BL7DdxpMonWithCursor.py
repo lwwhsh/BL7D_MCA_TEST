@@ -16,9 +16,9 @@ progversion = "0.1"
 
 
 class Point:
-    def __init__(self, pos, callback=None):
+    def __init__(self, ax, pos, callback=None):
         self.callback = callback
-        self.line = plt.axvline(pos, ls="--", c="k")
+        self.line = ax.axvline(pos, ls="--", c="k")
         self.pos = pos
         self.active = False
 
@@ -82,8 +82,8 @@ class LineFitter:
         self.ax.grid()
         self.ax.autoscale()
 
-        self.lowROI = Point(max(self.x) * 0.3, self.callback)
-        self.highROI = Point(max(self.x) * 0.7, self.callback)
+        self.lowROI = Point(self.ax, max(self.x) * 0.3, self.callback)
+        self.highROI = Point(self.ax, max(self.x) * 0.7, self.callback)
 
         # We need to draw *and* flush
         self.fig.canvas.draw()

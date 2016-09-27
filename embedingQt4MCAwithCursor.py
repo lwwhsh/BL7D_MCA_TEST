@@ -133,8 +133,7 @@ class ApplicationWindow(QtGui.QMainWindow):
     def __init__(self):
         QtGui.QMainWindow.__init__(self)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-        # self.setWindowTitle("application main window")
-        # self.setWindowIcon(QtGui.QIcon('test_icon.png'))
+        self.setWindowTitle("application main window")
 
         self.file_menu = QtGui.QMenu('&File', self)
         self.file_menu.addAction('&Quit', self.fileQuit,
@@ -184,10 +183,9 @@ modified versions may be distributed without limitation."""
                                 )
 
 if __name__ == '__main__':
-    qApp = QtGui.QApplication(sys.argv)
-    aw = ApplicationWindow()
-    aw.setWindowTitle("%s Ver %s" %(progname, progversion))
-    aw.setWindowIcon(QtGui.QIcon('test_icon.png'))
-    aw.show()
-    sys.exit(qApp.exec_())
-    # qApp.exec_()
+   qApp = QtGui.QApplication(sys.argv)
+   aw = ApplicationWindow()
+   aw.setWindowTitle("%s Ver %s" %(progname, progversion))
+   aw.show()
+   sys.exit(qApp.exec_())
+   # qApp.exec_()

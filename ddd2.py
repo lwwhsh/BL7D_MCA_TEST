@@ -157,8 +157,9 @@ class MainWindow(QMainWindow):
                           self.x, mcas[4], self.x, mcas[5],
                           self.x, mcas[6], linewidth=1.0)
 
-        self.drawing.set_ylim(0, 2500)
-        self.drawing.set_xlim(550, 680)
+        # self.drawing.set_ylim(0, 2500)
+        # self.drawing.set_xlim(550, 680)
+        self.drawing.relim()
 
         # test1
         self.drawing.axvline(599, ls="--", c="r", lw=2)
