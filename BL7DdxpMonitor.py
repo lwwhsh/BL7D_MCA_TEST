@@ -113,7 +113,7 @@ class MainWindow(QMainWindow):
                           self.x, mcas[6], linewidth=1.0)
 
         self.drawing.set_ylim(0, 2500)
-        self.drawing.set_xlim(550, 680)
+        #self.drawing.set_xlim(550, 680)
         self.drawing.grid()
         self.canvas.draw()
 

@@ -67,7 +67,7 @@ class LineFitter:
         # Create x axis value
         self.x = np.arange(0, len(self.mcas[0]), 1)
 
-        # Create PLOT graph GUI
+        # Create plot graph GUI
         # plt.ion()
         self.fig, self.ax = plt.subplots()
         self.fig.set_tight_layout(False)
@@ -79,13 +79,10 @@ class LineFitter:
                      self.x, self.mcas[4], self.x, self.mcas[5],
                      self.x, self.mcas[6], linewidth=1.0)
 
-        # self.ax = self.fig.gca()
-        self.ax.set_autoscaley_on(True)
-
-        # self.ax.plot(self.x, ydata)
         self.ax.grid()
+        self.ax.autoscale()
 
-        self.lowROI  = Point(max(self.x) * 0.3, self.callback)
+        self.lowROI = Point(max(self.x) * 0.3, self.callback)
         self.highROI = Point(max(self.x) * 0.7, self.callback)
 
         # We need to draw *and* flush
@@ -102,7 +99,7 @@ class LineFitter:
             return
 
         # self.commSignal.emit(self.plot) # emit the signal
-        # self.commSignal.emit()  # emit the signal
+        # self.commSignal.emit() # emit the signal
         self.plot()
 
     def addCallbackAcq(self):
@@ -118,16 +115,16 @@ class LineFitter:
         for i in self.dxpMcaPVs:
             self.mcas.append(i.get())
 
-        # TODO : implement ROI avarage
         for i in range(0, self.noOfElement, 1):
             avgMca = avgMca + sum(self.mcas[i][int(self.lowROI.pos):int(self.highROI.pos)])
 
-        print('=== Average: --%d-- ') %(avgMca / self.noOfElement), time.ctime()
+        print('=== Average: --%d--') %(avgMca / self.noOfElement), time.ctime()
 
         if self.ax.lines:
             i = 0
             for line in self.ax.lines:
-                # total 9(6mca + 2 axvline) line, so need remove last 2(axvline) lines
+                # this plot has total 9(7mca + 2axvline) lines,
+                # so need not include last 2(axvline) lines
                 if i < 7:
                     line.set_xdata(self.x)
                     line.set_ydata(self.mcas[i])
@@ -135,18 +132,18 @@ class LineFitter:
                 else:
                     pass
 
-        # self.ax.set_ylim(0, 50)
-        #- self.ax.set_xlim(0, 2048)
-        # self.ax.grid()
-        # self.canvas.draw()
-
-        #- self.ax.autoscale_view(scalex=False)
+        # y-axis set to autoscale
+        self.ax.relim()
+        self.ax.autoscale(enable=True, axis=u'y', tight=None)
+        # self.ax.autoscale_view()
         # We need to draw *and* flush
         self.fig.canvas.draw()
         self.fig.canvas.flush_events()
     # --------------------------------------------------------------------------
 
     def callback(self):
+        # TODO: implement cursor freez of min/max use self.lowROI.get_xbound()
+        # TODO: Display Low / High ROI value
         if self.lowROI.pos < 0 or None:
             self.lowROI.line.set_xdata(10)
             self.lowROI.pos = 10

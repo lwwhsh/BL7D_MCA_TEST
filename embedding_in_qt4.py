@@ -95,7 +95,7 @@ class MyDynamicMplCanvas(MyMplCanvas):
         self.c = MyStaticMplCanvas()
 
     def compute_initial_figure(self):
-        pass
+        pass # self.axes.plot([0, 1, 2, 3], [1, 2, 0, 4], 'r')
 
     # callback for get mca data.
     def OnChanged(self, pvname=None, value=None, char_value=None, **kw):
@@ -123,7 +123,7 @@ class MyDynamicMplCanvas(MyMplCanvas):
                        self.n, self.mcas[5],
                        self.n, self.mcas[6], linewidth=0.5)
 
-        self.axes.set_xlim(540, 680)
+        # self.axes.set_xlim(540, 680)
         self.axes.grid()
         self.draw()
         self.c.computer_sum(self.mcas)

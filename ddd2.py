@@ -82,7 +82,7 @@ class MainWindow(QMainWindow):
         self.drawing = self.figure.add_subplot(111)
 
         #test1
-        self.drawing.axvline(599, ls="--", c="r", lw=2)
+        #self.drawing.axvline(599, ls="--", c="r", lw=2)
 
         self.canvas  = matplotlib.backends.backend_qt4agg.FigureCanvasQTAgg(self.figure)
 
@@ -108,14 +108,11 @@ class MainWindow(QMainWindow):
         sliders_grid.addWidget(self.lowROI,  1, 0)
         sliders_grid.addWidget(self.highROI, 2, 0)
 
-
         dock.setWidget(sliders)
 
         #self.a = Point(self.figure, self.maxBins/4, self.callback)
         #self.b = Point(self.figure, self.maxBins/2, self.callback)
-
         #-----------------------------------------------------------------
-
 
         self.dxpAcqPV  = epics.PV('BL7D:dxpXMAP:Acquiring')
 

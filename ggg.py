@@ -14,17 +14,22 @@ class DynamicUpdate():
     def on_launch(self):
         # Set up plot
         self.figure, self.ax = plt.subplots()
-        self.lines, = self.ax.plot([], [], 'o')
+        self.lines, = self.ax.plot([]) ### [], [], 'o')
         # Autoscale on unknown axis and known lims on the other
         self.ax.set_autoscaley_on(True)
         self.ax.set_xlim(self.min_x, self.max_x)
         # Other stuff
+        self.vlines = self.ax.axvline(7, 0, 1, color='r')
         self.ax.grid()
 
     def on_running(self, xdata, ydata):
         # Update data (with the new _and_ the old points)
         self.lines.set_xdata(xdata)
         self.lines.set_ydata(ydata)
+
+        # self.ax.plot(xdata, ydata)
+        # self.vlines.set_xdata(xdata[-1:])
+
         # Need both of these in order to rescale
         self.ax.relim()
         self.ax.autoscale_view()
@@ -35,15 +40,16 @@ class DynamicUpdate():
     # Example
     def __call__(self):
     # def __init__(self):
-        self.on_launch()
+      self.on_launch()
+      while True:
         xdata = []
         ydata = []
-        for x in np.arange(0,10,0.05):
+        for x in np.arange(0., 10., 0.05):
             xdata.append(x)
             ydata.append(np.exp(-x**2)+10*np.exp(-(x-7)**2))
             self.on_running(xdata, ydata)
             time.sleep(.1)
-        return xdata, ydata
+        # return xdata, ydata
 
 d = DynamicUpdate()
 d()
