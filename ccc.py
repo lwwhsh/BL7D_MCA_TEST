@@ -4,7 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 
+
 plt.ion()
+
 
 def pltsin(ax, colors=['b']):
     x = np.linspace(0,1,100)
@@ -28,4 +30,4 @@ ax.set_ylim(0,1)
 
 for f in range(5):
     pltsin(ax, ['b', 'r'])
-    time.sleep(1)
+    time.sleep(5)
