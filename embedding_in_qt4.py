@@ -1,7 +1,5 @@
-#!/usr/bin/env python
-
+# -*- encoding: utf-8 -*-
 # embedding_in_qt4.py --- Simple Qt4 application embedding matplotlib canvases
-
 
 from __future__ import unicode_literals
 import sys
@@ -32,6 +30,7 @@ class MyMplCanvas(FigureCanvas):
     def __init__(self, parent=None, width=5, height=4, dpi=200):
         fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = fig.add_subplot(111)
+
         # We want the axes cleared every time plot() is called
         self.axes.hold(False)
         # TODO: is not working properly?
