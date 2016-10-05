@@ -25,24 +25,23 @@ progversion = "0.1"
 
 
 class Point:
-    def __init__(self, ax, pos, callback=None):
+
+    def __init__(self, canvas, ax, pos, callback=None):
         self.callback = callback
         self.line = ax.axvline(pos, ls="--", c="k")
         self.pos = pos
         self.active = False
 
-        plt.connect('button_press_event', self.on_press)
-        plt.connect('button_release_event', self.on_release)
-        plt.connect('motion_notify_event', self.on_motion)
+        canvas.mpl_connect('button_press_event', self.on_press)
+        canvas.mpl_connect('button_release_event', self.on_release)
+        canvas.mpl_connect('motion_notify_event', self.on_motion)
 
     def on_press(self, e):
-        print("On press")
         if self.line.contains(e)[0]:
             self.active = True
             self.on_motion(e)
 
     def on_motion(self, e):
-        print("On motion")
         if not self.active:
             return
         self.line.set_xdata(e.xdata)
@@ -53,7 +52,6 @@ class Point:
             self.line.figure.canvas.draw()
 
     def on_release(self, e):
-        print("On release")
         self.on_motion(e)
         self.active = False
 
@@ -76,9 +74,9 @@ class MainWindow(QMainWindow):
 
         self.figure, self.drawing = plt.subplots()
         self.figure.set_tight_layout(True)
-        #---self.canvas = FigureCanvas(self.figure)
-        self.figure.show()
-        #---self.setCentralWidget(self.canvas)
+        self.canvas = FigureCanvas(self.figure)
+
+        self.setCentralWidget(self.canvas)
         dock = QDockWidget("Values")
         self.addDockWidget(Qt.RightDockWidgetArea, dock)
 
@@ -126,8 +124,8 @@ class MainWindow(QMainWindow):
         self.drawing.grid()
         self.drawing.autoscale()
 
-        self.a = Point(self.drawing, self.maxBins / 4, self.callback)
-        self.b = Point(self.drawing, self.maxBins / 2, self.callback)
+        self.a = Point(self.canvas, self.drawing, self.maxBins / 4, self.callback)
+        self.b = Point(self.canvas, self.drawing, self.maxBins / 2, self.callback)
 
         # self.plot()
         # We need to draw *and* flush
@@ -194,7 +192,7 @@ class MainWindow(QMainWindow):
         self.a.line.set_xdata(0.4)
         self.b.line.set_xdata(0.5)
         '''
-        # self.drawing.figure.canvas.draw()
+        self.drawing.figure.canvas.draw()
         # self.canvas.draw()
         # self.ax2.figure.canvas.draw()
         # self.drawing.canvas.draw()

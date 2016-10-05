@@ -34,7 +34,7 @@ class Form(QMainWindow):
     def __init__(self, parent=None):
         super(Form, self).__init__(parent)
         self.setWindowTitle('PyQt & PyQwt demo: Data plotting')
-        self.resize(600, 400)
+        self.resize(1200, 800)
 
         self.data = DataHolder()
         self.series_list_model = QStandardItemModel()

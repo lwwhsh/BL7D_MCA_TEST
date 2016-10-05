@@ -1,195 +1,143 @@
 import sys
-from PyQt4.QtGui import QWidget, QPushButton, QMainWindow, QMdiArea, QVBoxLayout, QApplication
-from PyQt4.QtCore import Qt
+import platform
 
-from pylab import *
-from matplotlib.backends.backend_qt4agg import (
-    FigureCanvasQTAgg as FigureCanvas,
-    NavigationToolbar2QT as NavigationToolbar)
-from matplotlib.backend_bases import key_press_handler
+from PyQt4 import QtGui, QtCore
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_qt4 import NavigationToolbar2QT as NavigationToolbar
+import time
+from PyQt4.QtCore import *
+from PyQt4.QtGui import *
 
 
-class MyMainWindow(QMainWindow):
-    """ Defines a simple MainWindow with a QPushButton that plots a Random Wave Fucntion
-    which must be shown in a Window within a QMdiArea Widget.
-    """
+class MplCanvas(FigureCanvas):
 
+    def __init__(self):
+
+        # initialization of the canvas
+        self.fig = Figure()
+        FigureCanvas.__init__(self, self.fig)
+
+        self.ax = self.fig.add_axes([.15, .15, .75, .75])
+        self.canvas = self.ax.figure.canvas
+
+        # my added
+        # self.ax = self.fig.add_axes([.15, .15, .75, .75])
+        # cursor = C_Cursor(self.LvsT, useblit=True, color='red', linewidth=2 )
+
+        x = np.arange(0, 20, 0.1)
+
+        self.ax.plot(x, x**2, 'o')
+        self.ax.grid()
+        self.ax.set_xlim(-2, 2)
+        self.ax.set_ylim(-2, 2)
+
+        self.visible = True
+        self.horizOn = True
+        self.vertOn = True
+        self.useblit = True
+
+        # if self.useblit:
+        #     lineprops['animated'] = True
+
+        self.lineh = self.ax.axhline(self.ax.get_ybound()[0], visible=False)
+        self.linev = self.ax.axvline(self.ax.get_xbound()[0], visible=False)
+
+        self.background = None
+        self.needclear = False
+
+        self.count = 0
+
+        # cid0 = self.mpl_connect('axes_enter_event', self.enter_axes)
+        cid1 = self.mpl_connect('button_press_event', self.onpick)
+        cid2 = self.mpl_connect('motion_notify_event', self.onmove)
+        cid3 = self.mpl_connect('draw_event', self.clear)
+        cid4 = self.mpl_connect('key_press_event',self.press)
+
+        self.draw()
+
+    def clear(self, event):
+        # clear the cursor
+        if self.useblit:
+            self.background = self.canvas.copy_from_bbox(self.ax.bbox)
+        self.linev.set_visible(False)
+        self.lineh.set_visible(False)
+
+    def onmove(self, event):
+        # on mouse motion draw the cursor if visible
+        # print("move")
+        if event.inaxes != self.ax:
+            self.linev.set_visible(False)
+            self.lineh.set_visible(False)
+
+            if self.needclear:
+                self.canvas.draw()
+                self.needclear = False
+            return
+
+        self.needclear = True
+        if not self.visible:
+            return
+
+        self.linev.set_xdata((event.xdata, event.xdata))
+        self.lineh.set_ydata((event.ydata, event.ydata))
+        self.linev.set_visible(self.visible and self.vertOn)
+        self.lineh.set_visible(self.visible and self.horizOn)
+
+        self._update()
+
+    def _update(self):
+
+        if self.useblit:
+            if self.background is not None:
+                self.canvas.restore_region(self.background)
+
+            self.ax.draw_artist(self.linev)
+            self.ax.draw_artist(self.lineh)
+            self.canvas.blit(self.ax.bbox)
+        else:
+            self.canvas.draw_idle()
+
+        return False
+
+    def enter_axes(self, event):
+
+        print "Enter"
+
+    def onpick(self, event):
+        print "click"
+        print 'you pressed', event.canvas
+
+        a = np.arange(10)
+        print a
+        print self.count
+
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.plot(a)
+        fig.show()
+
+    def press(self, event):
+        print ('press', event.key)
+        self.fig.canvas.draw()
+
+
+class MplWidget(QtGui.QWidget):
     def __init__(self, parent=None):
-        """
-        """
+        QtGui.QWidget.__init__(self, parent)
 
-        super(MyMainWindow,self).__init__(parent)
-        self.setWidgets()
-
-    def setWidgets(self, ):
-        """ Createsthe QPushButton and QMdiArea Widgets, organising them in
-        QVBoxLayout as a central Widget of the MainWindow
-        """
-
-        vBox = QVBoxLayout()
-        mainFrame = QWidget()
-
-        self._plotGraphButton = QPushButton("Plot Graph")
-        self._plotGraphButton.clicked.connect(self.plotRandom)
-
-        self._mdiArea = QMdiArea()
-        vBox.addWidget(self._plotGraphButton)
-        vBox.addWidget(self._mdiArea)
-
-        mainFrame.setLayout(vBox)
-        self.setCentralWidget(mainFrame)
+        self.vbl = QtGui.QVBoxLayout()
+        self.canvas = MplCanvas()
+        self.vbl.addWidget(self.canvas)
+        self.setLayout(self.vbl)
 
 
-    # This is the function called when the Plot Graph Button is pressed
-    #and where the Picking event does not work.
-    # When the button is pressed a new window with the plot is shown, but
-    #it is not possible to drag the rectangle patch with the mouse.
-    def plotRandom(self, ):
-        """ Generates and Plots a random wave function (+noise) embedding into a
-        QMdiAreaSubWindow.
-        """
-        print "Plotting!!"
-        x = linspace(0,10,1000)
-        w = rand(1)*10
-        y = 100*rand(1)*sin(2*pi*w*x)+rand(1000)
+if __name__ == "__main__":
 
-        p = PlotGraph(x,y)
-        child = self._mdiArea.addSubWindow(p.plotQtCanvas())
-        child.show()
-
-
-
-class PlotGraph(object):
-    """
-    """
-
-    def __init__(self, x,y):
-        """ This class plots the data and encapsulates the figure instance in a FigureCanvasQt4Agg,
-        which can be used to create a QMdiArea SubWindow.
-         A rectangle patch is added to the plot and linked to the methods that
-        can drag it horizontally in the graph.
-
-        Arguments:
-        - `x`: Data
-        - `y`: Data
-        """
-        self._x = x
-        self._dx = x[1]-x[0]
-        self._y = y
-
-
-    def _createPlotWidget(self, ):
-        """ Creates a figure and a NavigationBar organising them vertically into a QWidget,
-        which can be used by a QMdiArea.addSubWindow method.
-        """
-        self._mainFrame = QWidget()
-
-        self._fig = figure(facecolor="white")
-        self._canvas = FigureCanvas(self._fig)
-        self._canvas.setParent(self._mainFrame)
-        self._canvas.setFocusPolicy(Qt.StrongFocus)
-
-        # Standard NavigationBar and button press management
-        self._mplToolbar = NavigationToolbar(self._canvas, self._mainFrame)
-        self._canvas.mpl_connect('key_press_event', self.on_key_press)
-
-        # Layouting
-        vbox = QVBoxLayout()
-        vbox.addWidget(self._canvas)  # the matplotlib canvas
-        vbox.addWidget(self._mplToolbar)
-        self._mainFrame.setLayout(vbox)
-
-    def plotQtCanvas(self, ):
-        """ Plots data using matplotlib, adds a draggable Rectangle and connects the dragging
-        methods to the mouse events
-        """
-        self._createPlotWidget()
-        ax = self._fig.add_subplot(111)
-        ax.plot(self._x,self._y)
-        ax.set_xlim(self._x[0],self._x[-1])
-        ax.set_ylim(-max(self._y)*1.1,max(self._y)*1.1)
-
-        xlim = ax.get_xlim()
-        ylim = ax.get_ylim()
-
-        wd = (xlim[1]-xlim[0])*0.1
-        ht = (ylim[1]-ylim[0])
-
-        rect = Rectangle((xlim[0],ylim[0]),wd,ht,alpha=0.3,color="g",picker=True)
-        ax.add_patch(rect)
-
-
-        # Connecting Events to Rectangle dragging methods
-        self._canvas.mpl_connect("pick_event",self.on_pick)
-        self._canvas.mpl_connect("button_release_event",self.on_release)
-
-        return self._mainFrame
-
-    def on_pick(self,event):
-        """ Manages the Artist Picking event. This method register which
-        Artist was picked and connects the rectOnMove method to the mouse
-        motion_notify_event SIGNAL.
-
-        Arguments:
-        - `event`:
-        """
-        if isinstance(event.artist, Rectangle):
-
-            rectWd = event.artist.get_width()
-            if event.mouseevent.button == 1:
-                self._dragged = event.artist
-                self._id = self._canvas.mpl_connect("motion_notify_event",self.rectOnMove)
-
-
-    def rectOnMove(self, event):
-        """ After being picked, updates the new position of the Artist.
-
-        Arguments:
-        - `event`:
-        """
-        rectWd = self._dragged.get_width()
-        if event.xdata:
-            i = event.xdata
-            n2 = rectWd/2.0
-            if i>=n2 and i<(self._x[-1]-n2):
-                self._dragged.set_x(i-n2)
-                self._canvas.draw()
-
-    def on_release(self,event):
-        """ When the mouse button is released, simply disconnect the
-        SIGNAL motion_notify_event and the rectOnMove method.
-
-        Arguments:
-        - `event`:
-        """
-        self._canvas.mpl_disconnect(self._id)
-
-
-    def on_key_press(self, event):
-        # implement the default mpl key press events described at
-        # http://matplotlib.org/users/navigation_toolbar.html#navigation-keyboard-shortcuts
-        key_press_handler(event, self._canvas, self._mplToolbar)
-
-
-
-if __name__ == '__main__':
-    qApp = QApplication(sys.argv)
-    MainWindow = MyMainWindow()
-
-    # By calling the piece of code bellow everything works fine and the
-    # the rectangle patch can be dragged, as expected.
-
-    # This piece of code "theoretically" does the same thing as the
-    # method plotRandom() defined in the class MyMainWindow.
-    print "Plotting!!"
-    x = linspace(0,10,1000)
-    w = rand(1)*10
-    y = 100*rand(1)*sin(2*pi*w*x)
-    ####################################################################
-
-    p = PlotGraph(x,y)
-    child = MainWindow._mdiArea.addSubWindow(p.plotQtCanvas())
-    child.show()
-
-    MainWindow.show()
-    sys.exit(qApp.exec_())
+    app = QApplication(sys.argv)
+    form = MplWidget()
+    form.show()
+    # form.resize(400, 400)
+    app.exec_()

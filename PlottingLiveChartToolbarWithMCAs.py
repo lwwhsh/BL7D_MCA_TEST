@@ -94,7 +94,7 @@ class CustomMainWindow(QtGui.QMainWindow):
     def addData_callbackFunc(self, value):
         # print("Add data: " + str(value))
         self.myFig.addData(value)
-        epics.caput('BL7D:dxpXMAP:EraseStart', 1)
+        ## epics.caput('BL7D:dxpXMAP:EraseStart', 1)
 
     def fileQuit(self):
         self.close()
@@ -199,7 +199,8 @@ class Communicate(QtCore.QObject):
 
 
 onChangedSignal = 0
-mcas = 0.0
+mcas = 0.
+dxpMCAs = []
 
 dxpMcaPVs = []
 for i in range(1, 8, 1):
@@ -207,20 +208,28 @@ for i in range(1, 8, 1):
 
 
 def onChanged(pvname=None, value=None, char_value=None, **kw):
-    global onChangedSignal, mcas, dxpMcaPV
+    global onChangedSignal, mcas, dxpMcaPV, dxpMCAs
     if value is 1:  # 1=Acquiring, 0=Done.
-        print('Acquiring... ', time.ctime())
+        # print('Acquiring... ', time.ctime())
         onChangedSignal = 0
         return
 
     mcas = 0.0
+
     '''
     for i in dxpMcaPVs:
         mcas = mcas + sum(i.get())
 
     mcas = (mcas / dxpMcaPVs.__len__())
     '''
-    mcas = sum(dxpMcaPVs[0].get())
+    # mcas = sum(dxpMcaPVs[0].get())
+    dxpMCAs = []
+    for i in dxpMcaPVs:
+        dxpMCAs.append(i.get())
+    for i in range(0, 7, 1):
+        mcas = mcas + sum(dxpMCAs[i][610:680])
+
+    mcas = mcas / 7
     print("MCAs Average... ", mcas)
 
     onChangedSignal = 1
@@ -237,17 +246,17 @@ def dataSendLoop(addData_callbackFunc):
 
     onChangedSignal = 0
     mcas = 0.0
-    epics.caput('BL7D:dxpXMAP:EraseStart', 1)
+    # epics.caput('BL7D:dxpXMAP:EraseStart', 1)
 
     dxpAcqPV  = epics.PV('BL7D:dxpXMAP:Acquiring', callback=onChanged)
-    epics.caput('BL7D:dxpXMAP:EraseStart', 1)
+    # epics.caput('BL7D:dxpXMAP:EraseStart', 1)
 
     while True:
         if onChangedSignal is 1:
             onChangedSignal = 0
             time.sleep(1.0)
             mySrc.data_signal.emit(mcas)  # <- Here you emit a signal!
-            #epics.caput('BL7D:dxpXMAP:EraseStart', 1)
+            # epics.caput('BL7D:dxpXMAP:EraseStart', 1)
 
         time.sleep(0.02)
 

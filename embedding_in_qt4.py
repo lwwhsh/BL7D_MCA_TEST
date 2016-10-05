@@ -28,6 +28,7 @@ class MyMplCanvas(FigureCanvas):
     """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
 
     def __init__(self, parent=None, width=5, height=4, dpi=200):
+
         fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = fig.add_subplot(111)
 
@@ -57,6 +58,7 @@ class MyStaticMplCanvas(MyMplCanvas):
         t = arange(0.0, 3.0, 0.01)
         s = sin(2*pi*t)
         self.axes.plot(t, s)
+        self.axes.grid()
 
     def computer_sum(self, mcas):
         sums = 0.0
@@ -91,7 +93,7 @@ class MyDynamicMplCanvas(MyMplCanvas):
         self.n = linspace(0, self.xlim - 1, self.xlim)
         self.addCallbackAcq()
 
-        self.c = MyStaticMplCanvas()
+        ############################# self.c = MyStaticMplCanvas()
 
     def compute_initial_figure(self):
         pass # self.axes.plot([0, 1, 2, 3], [1, 2, 0, 4], 'r')
@@ -125,7 +127,7 @@ class MyDynamicMplCanvas(MyMplCanvas):
         # self.axes.set_xlim(540, 680)
         self.axes.grid()
         self.draw()
-        self.c.computer_sum(self.mcas)
+        ###########################- self.c.computer_sum(self.mcas)
 
 
 class ApplicationWindow(QtGui.QMainWindow):
@@ -149,15 +151,22 @@ class ApplicationWindow(QtGui.QMainWindow):
         self.main_widget = QtGui.QWidget(self)
 
         l = QtGui.QVBoxLayout(self.main_widget)
+
         sc = MyStaticMplCanvas(self.main_widget, width=5, height=4, dpi=80)
+        sc.figure.set_tight_layout(True)
+        # Place the toolbar for static canvas
+        self.sc_navi_toolbar = NavigationToolbar(sc, self.main_widget)
+
         dc = MyDynamicMplCanvas(self.main_widget, width=5, height=4, dpi=80)
+        dc.figure.set_tight_layout(True)
+        # Place the toolbar for dynamic canvas
+        self.dc_navi_toolbar = NavigationToolbar(dc, self.main_widget)
+
+        # if use grid_layout use like this, self.LAYOUT_A.addWidget(self.navi_toolbar, *(1, 1))
+        l.addWidget(self.sc_navi_toolbar)
         l.addWidget(sc)
         l.addWidget(dc)
-
-        # Place the toolbar
-        self.navi_toolbar = NavigationToolbar(dc, self.main_widget)
-        # if use grid_layout use like this, self.LAYOUT_A.addWidget(self.navi_toolbar, *(1, 1))
-        l.addWidget(self.navi_toolbar)
+        l.addWidget(self.dc_navi_toolbar)
 
         self.main_widget.setFocus()
         self.setCentralWidget(self.main_widget)

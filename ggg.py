@@ -1,55 +1,50 @@
-# -*- coding: utf-8 -*-
-import matplotlib.pyplot as plt
 import numpy as np
-import time
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+from time import sleep
 
-plt.ion()
+val1 = np.zeros(100)         
+val2 = np.zeros(100)      
 
+level1 = 0.2
+level2 = 0.5
 
-class DynamicUpdate():
-    # Suppose we know the x range
-    min_x = 0
-    max_x = 10
+fig, ax = plt.subplots()
 
-    def on_launch(self):
-        # Set up plot
-        self.figure, self.ax = plt.subplots()
-        self.lines, = self.ax.plot([]) ### [], [], 'o')
-        # Autoscale on unknown axis and known lims on the other
-        self.ax.set_autoscaley_on(True)
-        self.ax.set_xlim(self.min_x, self.max_x)
-        # Other stuff
-        self.vlines = self.ax.axvline(7, 0, 1, color='r')
-        self.ax.grid()
+ax1 = plt.subplot2grid((2,1), (0,0))
+lineVal1, = ax1.plot(np.zeros(100))
+ax1.set_ylim(-0.5, 1.5)    
 
-    def on_running(self, xdata, ydata):
-        # Update data (with the new _and_ the old points)
-        self.lines.set_xdata(xdata)
-        self.lines.set_ydata(ydata)
+ax2 = plt.subplot2grid((2,1), (1,0))
+lineVal2, = ax2.plot(np.zeros(100), color = "r")
+ax2.set_ylim(-0.5, 1.5)    
 
-        # self.ax.plot(xdata, ydata)
-        # self.vlines.set_xdata(xdata[-1:])
+def onMouseMove(event):
+  ax1.axvline(x=event.xdata, color="k")
+  ax2.axvline(x=event.xdata, color="k")
 
-        # Need both of these in order to rescale
-        self.ax.relim()
-        self.ax.autoscale_view()
-        # We need to draw *and* flush
-        self.figure.canvas.draw()
-        self.figure.canvas.flush_events()
+def updateData():
+  global level1, val1
+  global level2, val2
 
-    # Example
-    def __call__(self):
-    # def __init__(self):
-      self.on_launch()
-      while True:
-        xdata = []
-        ydata = []
-        for x in np.arange(0., 10., 0.05):
-            xdata.append(x)
-            ydata.append(np.exp(-x**2)+10*np.exp(-(x-7)**2))
-            self.on_running(xdata, ydata)
-            time.sleep(.1)
-        # return xdata, ydata
+  clamp = lambda n, minn, maxn: max(min(maxn, n), minn)
 
-d = DynamicUpdate()
-d()
+  level1 = clamp(level1 + (np.random.random()-.5)/20.0, 0.0, 1.0)
+  level2 = clamp(level2 + (np.random.random()-.5)/10.0, 0.0, 1.0)
+
+  # values are appended to the respective arrays which keep the last 100 readings
+  val1 = np.append(val1, level1)[-100:]
+  val2 = np.append(val2, level2)[-100:]
+
+  yield 1     # FuncAnimation expects an iterator
+
+def visualize(i):
+
+  lineVal1.set_ydata(val1)
+  lineVal2.set_ydata(val2)
+
+  return lineVal1,lineVal2
+
+fig.canvas.mpl_connect('motion_notify_event', onMouseMove)
+ani = animation.FuncAnimation(fig, visualize, updateData, interval=50)
+plt.show()
