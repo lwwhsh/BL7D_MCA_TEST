@@ -8,7 +8,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from PyQt4.QtCore import Qt
-from PyQt4 import QtCore
+from PyQt4 import QtCore, QtGui
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 
 
 progname = path.basename(sys.argv[0])
@@ -73,7 +75,7 @@ class LineFitter:
         self.fig.set_tight_layout(False)
         self.fig.canvas.set_window_title(progname + ' Ver.' + progversion)
         self.fig.suptitle('BL7D MCA with ROI bar')
-        # first plot mca data
+        # 1st plot mca data
         self.ax.plot(self.x, self.mcas[0], self.x, self.mcas[1],
                      self.x, self.mcas[2], self.x, self.mcas[3],
                      self.x, self.mcas[4], self.x, self.mcas[5],
@@ -126,7 +128,7 @@ class LineFitter:
                 # this plot has total 9(7mca + 2axvline) lines,
                 # so need not include last 2(axvline) lines
                 if i < 7:
-                    line.set_xdata(self.x)
+                    # line.set_xdata(self.x)
                     line.set_ydata(self.mcas[i])
                     i += 1
                 else:
