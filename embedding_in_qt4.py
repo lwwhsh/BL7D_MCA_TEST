@@ -11,7 +11,7 @@ if use_pyside:
     from PySide import QtGui, QtCore
 else:
     from PyQt4 import QtGui, QtCore
-from numpy import arange, sin, pi, linspace
+from numpy import arange, sin, pi, linspace, append
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
@@ -29,17 +29,17 @@ class MyMplCanvas(FigureCanvas):
 
     def __init__(self, parent=None, width=5, height=4, dpi=200):
 
-        fig = Figure(figsize=(width, height), dpi=dpi)
-        self.axes = fig.add_subplot(111)
+        self.fig = Figure(figsize=(width, height), dpi=dpi)
+        self.axes = self.fig.add_subplot(111)
 
         # We want the axes cleared every time plot() is called
-        self.axes.hold(False)
+        self.axes.hold(None)
         # TODO: is not working properly?
-        self.axes.grid()
+        # self.axes.grid()
 
         self.compute_initial_figure()
 
-        FigureCanvas.__init__(self, fig)
+        FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
 
         FigureCanvas.setSizePolicy(self,
@@ -55,24 +55,24 @@ class MyStaticMplCanvas(MyMplCanvas):
     """Simple canvas with a sine plot."""
 
     def compute_initial_figure(self):
-        t = arange(0.0, 3.0, 0.01)
-        s = sin(2*pi*t)
-        self.axes.plot(t, s)
+        self.t = arange(0, 2000, 1)
+        self.s = sin(2*pi*self.t)
+        self.axes.plot(self.t, self.s)
         self.axes.grid()
 
-    @QtCore.pyqtSlot(int)
+    @QtCore.pyqtSlot(float)
     def computer_sum(self, mcas):
         print('computer_sum: %d' %(mcas))
-        return
 
-        """sums = 0.0
+        # append new ROI averaged mca data.
+        self.s = append(self.s, mcas)[-2000:]
+        self.axes.lines[0].set_ydata(self.s)
 
-        for i in range(0, len(mcas)):
-            sums = sums + sum(mcas[i])
-
-        sums = sums / (i+1)
-        print 'sum: %d' %sums
-        """
+        self.axes.relim()
+        self.axes.autoscale_view(True, True, True)
+        self.axes.autoscale(enable=True, axis=u'y', tight=True)
+        self.fig.canvas.draw()
+        self.fig.canvas.flush_events()
 
 
 class MyDynamicMplCanvas(MyMplCanvas):
@@ -87,16 +87,18 @@ class MyDynamicMplCanvas(MyMplCanvas):
         # timer.timeout.connect(self.update_figure)
         # timer.start(2000)
         # -------------------------------------------------------------------
+        self.numOfElement = 7
+
         self.dxpMcaPVs = []
         self.mcas = []
 
-        for i in range(1, 8, 1):
-            self.dxpMcaPVs.append(epics.PV('BL7D:dxpXMAP:mca' + str(i)))
+        for i in range(0, self.numOfElement, 1):
+            self.dxpMcaPVs.append(epics.PV('BL7D:dxpXMAP:mca' + str(i+1)))
 
         self.dxpStartPV = epics.PV("BL7D:dxpXMAP:EraseStart")
         self.dxpAcqPV = epics.PV('BL7D:dxpXMAP:Acquiring')
 
-        # TODO: how can update mca bins? it update self.xlim value
+        # TODO: how can automatic catch and update mca bins?
         self.xlim = 2048
         self.n = linspace(0, self.xlim - 1, self.xlim)
         self.addCallbackAcq()
@@ -107,7 +109,7 @@ class MyDynamicMplCanvas(MyMplCanvas):
     # callback for get mca data.
     def OnChanged(self, pvname=None, value=None, char_value=None, **kw):
         if value is 1: # value 1=Acquiring, 0=Done
-            print 'Acquiring...', time.ctime()
+            # print 'Acquiring...', time.ctime()
             return
         self.mcas = []
         for i in self.dxpMcaPVs :
@@ -131,11 +133,11 @@ class MyDynamicMplCanvas(MyMplCanvas):
         self.axes.grid()
         self.draw()
 
-        avgMca = 0
+        avgMca = 0.0 # TODO: this 'avgMca' has dose not include deadtime correction
         # TODO: implement average beatween ROI in mcas
-        for i in range(0, 7, 1):
+        for i in range(0, self.numOfElement, 1):
             avgMca = avgMca + sum(self.mcas[i][570:620])
-        avgMca /= 7
+        avgMca /= self.numOfElement
         self.procStart.emit(avgMca)
 
 
@@ -162,11 +164,11 @@ class ApplicationWindow(QtGui.QMainWindow):
         l = QtGui.QVBoxLayout(self.main_widget)
 
         sc = MyStaticMplCanvas(self.main_widget, width=5, height=4, dpi=80)
-        sc.figure.set_tight_layout(True)
+        # sc.figure.set_tight_layout(True)
         self.sc_navi_toolbar = NavigationToolbar(sc, self.main_widget)
 
         dc = MyDynamicMplCanvas(self.main_widget, width=5, height=4, dpi=80)
-        dc.figure.set_tight_layout(True)
+        # dc.figure.set_tight_layout(True)
         self.dc_navi_toolbar = NavigationToolbar(dc, self.main_widget)
 
         # if use grid_layout use like this, self.LAYOUT_A.addWidget(self.navi_toolbar, *(1, 1))
