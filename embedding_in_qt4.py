@@ -60,20 +60,28 @@ class MyStaticMplCanvas(MyMplCanvas):
         self.axes.plot(t, s)
         self.axes.grid()
 
+    @QtCore.pyqtSlot(int)
     def computer_sum(self, mcas):
-        sums = 0.0
+        print('computer_sum: %d' %(mcas))
+        return
+
+        """sums = 0.0
 
         for i in range(0, len(mcas)):
             sums = sums + sum(mcas[i])
 
         sums = sums / (i+1)
         print 'sum: %d' %sums
+        """
 
 
 class MyDynamicMplCanvas(MyMplCanvas):
     """A canvas that updates itself every Acquiring-PV with a new plot."""
 
+    procStart = QtCore.pyqtSignal(int)
+
     def __init__(self, *args, **kwargs):
+
         MyMplCanvas.__init__(self, *args, **kwargs)
         # timer = QtCore.QTimer(self)
         # timer.timeout.connect(self.update_figure)
@@ -93,10 +101,8 @@ class MyDynamicMplCanvas(MyMplCanvas):
         self.n = linspace(0, self.xlim - 1, self.xlim)
         self.addCallbackAcq()
 
-        ############################# self.c = MyStaticMplCanvas()
-
     def compute_initial_figure(self):
-        pass # self.axes.plot([0, 1, 2, 3], [1, 2, 0, 4], 'r')
+        pass
 
     # callback for get mca data.
     def OnChanged(self, pvname=None, value=None, char_value=None, **kw):
@@ -116,22 +122,26 @@ class MyDynamicMplCanvas(MyMplCanvas):
     def update_figure(self):
         # Build a list of all MCA integers between 0 to self.xlim length
         # self.axes.plot(self.n, self.mcas[0], 'b-', self.n, self.mcas[1], 'r-', linewidth=0.5)
-        self.axes.plot(self.n, self.mcas[0],
-                       self.n, self.mcas[1],
-                       self.n, self.mcas[2],
-                       self.n, self.mcas[3],
-                       self.n, self.mcas[4],
-                       self.n, self.mcas[5],
+        self.axes.plot(self.n, self.mcas[0], self.n, self.mcas[1],
+                       self.n, self.mcas[2], self.n, self.mcas[3],
+                       self.n, self.mcas[4], self.n, self.mcas[5],
                        self.n, self.mcas[6], linewidth=0.5)
 
         # self.axes.set_xlim(540, 680)
         self.axes.grid()
         self.draw()
-        ###########################- self.c.computer_sum(self.mcas)
+
+        avgMca = 0
+        # TODO: implement average beatween ROI in mcas
+        for i in range(0, 7, 1):
+            avgMca = avgMca + sum(self.mcas[i][570:620])
+        avgMca /= 7
+        self.procStart.emit(avgMca)
 
 
 class ApplicationWindow(QtGui.QMainWindow):
-    def __init__(self):
+    def __init__(self, parent=None):
+
         QtGui.QMainWindow.__init__(self)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         # self.setWindowTitle("application main window")
@@ -149,17 +159,14 @@ class ApplicationWindow(QtGui.QMainWindow):
         self.help_menu.addAction('&About', self.about)
 
         self.main_widget = QtGui.QWidget(self)
-
         l = QtGui.QVBoxLayout(self.main_widget)
 
         sc = MyStaticMplCanvas(self.main_widget, width=5, height=4, dpi=80)
         sc.figure.set_tight_layout(True)
-        # Place the toolbar for static canvas
         self.sc_navi_toolbar = NavigationToolbar(sc, self.main_widget)
 
         dc = MyDynamicMplCanvas(self.main_widget, width=5, height=4, dpi=80)
         dc.figure.set_tight_layout(True)
-        # Place the toolbar for dynamic canvas
         self.dc_navi_toolbar = NavigationToolbar(dc, self.main_widget)
 
         # if use grid_layout use like this, self.LAYOUT_A.addWidget(self.navi_toolbar, *(1, 1))
@@ -172,6 +179,8 @@ class ApplicationWindow(QtGui.QMainWindow):
         self.setCentralWidget(self.main_widget)
 
         self.statusBar().showMessage("All hail matplotlib!", 2000)
+
+        dc.procStart.connect(sc.computer_sum)
 
     def fileQuit(self):
         self.close()
