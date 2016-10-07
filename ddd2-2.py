@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys, os
+import sys
+import os
 
 # namespace organization changed in PyQt5 but the class name was kept.
 # importing this way makes it easier to change to PyQt5 later
@@ -86,14 +87,14 @@ class MainWindow(QMainWindow):
 
         chkRepeaterRun = QCheckBox("&Repeater...")
         chkRepeaterRun.setFocusPolicy(Qt.NoFocus)
-        sliders_grid.addWidget(chkRepeaterRun,0,0)
+        sliders_grid.addWidget(chkRepeaterRun, 0, 0)
 
-        self.lowROI  = QLineEdit()
+        self.lowROI = QLineEdit()
         # self.lowROI.setFocusPolicy(Qt.NoFocus)
         self.lowROI.setValidator(QIntValidator(0, self.maxBins - 1))
         self.highROI = QLineEdit()
         # self.highROI.setFocusPolicy(Qt.NoFocus)
-        self.highROI.setValidator(QIntValidator(0, self.maxBins -1))
+        self.highROI.setValidator(QIntValidator(0, self.maxBins - 1))
         sliders_grid.addWidget(self.lowROI,  1, 0)
         sliders_grid.addWidget(self.highROI, 2, 0)
 
@@ -105,7 +106,7 @@ class MainWindow(QMainWindow):
         self.noOfElement = 7
         self.dxpAcqPV = epics.PV('BL7D:dxpXMAP:Acquiring')
 
-        for i in range(1, self.noOfElement+1, 1) :
+        for i in range(1, self.noOfElement+1, 1):
             self.dxpMcaPVs.append(epics.PV('BL7D:dxpXMAP:mca' + str(i)))
 
         # Read current mcas
@@ -137,7 +138,7 @@ class MainWindow(QMainWindow):
     def onChanged(self, pvname=None, value=None, char_value=None, **kw):
         # print('onChanged: '), char_value, time.ctime()
         # value 1=Acquiring, 0=Done
-        if value is 1 :
+        if value is 1:
             return
 
         # self.commSignal.emit(self.plot) # emit the signal
@@ -155,9 +156,9 @@ class MainWindow(QMainWindow):
         avgMca = 0.0
 
         # get new dxpDatas to mcas
-        for i in self.dxpMcaPVs :
+        for i in self.dxpMcaPVs:
             self.mcas.append(i.get())
-        for i in range(0, self.noOfElement, 1) :
+        for i in range(0, self.noOfElement, 1):
             avgMca = avgMca + sum(self.mcas[i][560:630])
 
         print ('Average: %d ') %(avgMca / self.noOfElement), time.ctime()
@@ -188,10 +189,10 @@ class MainWindow(QMainWindow):
         # self.canvas.draw()
 
     def callback(self):
-        ''' manual set line position like this
-        self.a.line.set_xdata(0.4)
-        self.b.line.set_xdata(0.5)
-        '''
+        # manual set line position like this
+        # self.a.line.set_xdata(0.4)
+        # self.b.line.set_xdata(0.5)
+
         self.drawing.figure.canvas.draw()
         # self.canvas.draw()
         # self.ax2.figure.canvas.draw()
