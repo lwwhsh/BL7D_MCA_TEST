@@ -56,7 +56,7 @@ class MyStaticMplCanvas(MyMplCanvas):
     def compute_initial_figure(self):
         self.t = arange(0, 2000, 1)
         self.s = sin(2*pi*self.t)
-        self.axes.plot(self.t, self.s)
+        self.axes.plot(self.t, self.s, marker='o')
         self.axes.grid(True)
 
     @QtCore.pyqtSlot(float)
@@ -174,7 +174,7 @@ class MyDynamicMplCanvas(MyMplCanvas):
         if self.axes.lines:
             i = 0
             for line in self.axes.lines:
-                # this plot has total 9(7mca + 2axvline) lines,
+                # this axes has total 9(7mca + 2axvline) lines,
                 # so need not include last 2(axvline) lines
                 if i < 7:
                     # line.set_xdata(self.x)
@@ -190,7 +190,7 @@ class MyDynamicMplCanvas(MyMplCanvas):
         self.fig.canvas.draw()
         self.fig.canvas.flush_events()
 
-        avgMca = 0.0 # TODO: this 'avgMca' has dose not include deadtime correction
+        avgMca = 0.0 # TODO: this 'avgMca' value dose not include deadtime correction
         for i in range(0, self.numOfElement, 1):
             avgMca = avgMca + sum(self.mcas[i][int(self.lowROI.pos):int(self.highROI.pos)])  # self.mcas[i][570:620])
         avgMca /= self.numOfElement
@@ -249,7 +249,9 @@ class ApplicationWindow(QtGui.QMainWindow):
         self.main_widget.setFocus()
         self.setCentralWidget(self.main_widget)
 
-        self.statusBar().showMessage("All hail matplotlib!", 2000)
+        # self.statusBar().showMessage("All hail matplotlib!", 2000)
+        dispStatus = QtGui.QLabel(" BL7D dxpXMAP monitoring | normal")
+        self.statusBar().addWidget(dispStatus)
 
         dc.procStart.connect(sc.computer_sum)
 
@@ -262,13 +264,11 @@ class ApplicationWindow(QtGui.QMainWindow):
     def about(self):
         QtGui.QMessageBox.about(self, "About",
                                 """embedding_in_qt4.py example
-Copyright 2016 WoulWoo Lee
+Copyright 2016 WoulWoo Lee.
 
-This program is a simple mca monitoring of DXP detector example.
+This program is a simple mca monitoring of CANBERRA 7Ge DXP detector.
 use Qt4 application embedding matplotlib canvases.
-
-It may be used and modified with no restriction; raw copies as well as
-modified versions may be distributed without limitation."""
+"""
                                 )
 
 if __name__ == '__main__':

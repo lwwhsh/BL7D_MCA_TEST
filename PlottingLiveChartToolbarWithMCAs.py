@@ -119,7 +119,7 @@ class CustomFigCanvas(FigureCanvas, TimedAnimation):
         self.y = epics.caget("BL7D:dxpXMAP:mca1")
 
         # The window
-        self.fig = Figure(figsize=(5,5), dpi=75)
+        self.fig = Figure(figsize=(5, 5), dpi=75)
         self.ax1 = self.fig.add_subplot(111)
 
         self.ax1.grid()
@@ -136,7 +136,7 @@ class CustomFigCanvas(FigureCanvas, TimedAnimation):
         self.ax1.add_line(self.line1_head)
 
         FigureCanvas.__init__(self, self.fig)
-        TimedAnimation.__init__(self, self.fig, interval=100, blit=True)
+        TimedAnimation.__init__(self, self.fig, interval=300, blit=True)
 
     def new_frame_seq(self):
         return iter(range(self.n.size))
@@ -227,7 +227,7 @@ def onChanged(pvname=None, value=None, char_value=None, **kw):
     for i in dxpMcaPVs:
         dxpMCAs.append(i.get())
     for i in range(0, 7, 1):
-        mcas = mcas + sum(dxpMCAs[i][610:680])
+        mcas = mcas + sum(dxpMCAs[i][570:620])
 
     mcas = mcas / 7
     print("MCAs Average... ", mcas)

@@ -128,7 +128,7 @@ class LineFitter:
                 # this plot has total 9(7mca + 2axvline) lines,
                 # so need not include last 2(axvline) lines
                 if i < 7:
-                    line.set_xdata(self.x)
+                    # line.set_xdata(self.x)
                     line.set_ydata(self.mcas[i])
                     i += 1
                 else:
