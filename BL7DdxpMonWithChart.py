@@ -63,7 +63,6 @@ class MyStaticMplCanvas(MyMplCanvas):
 
         # for Repeat EraseRestart
         self.repeated = 0
-
         self.t = arange(0, 2000, 1)
         self.s = sin(2*pi*self.t)
         self.axes.plot(self.t, self.s, marker='o', markersize=3)
@@ -79,7 +78,8 @@ class MyStaticMplCanvas(MyMplCanvas):
 
         self.axes.relim()
         self.axes.autoscale_view(True, True, True)
-        self.axes.autoscale(enable=True, axis=u'both', tight=True)
+        # self.axes.autoscale(enable=True, axis=u'both', tight=True)
+        self.axes.autoscale(enable=True, axis=u'x', tight=True)
         self.fig.canvas.draw()
         self.fig.canvas.flush_events()
 
@@ -189,21 +189,20 @@ class MyDynamicMplCanvas(MyMplCanvas):
 
     def update_figure(self):
 
-        # ##################################################
-        # for gaussian fit.
-        # ##################################################
-        i = 0
+        # ###################################################
+        # for gaussian fit for test. but it not interesting #
+        # ###################################################
         '''
+        i = 0
         while i < 7:
             popt=[]
             pcov=[]
 
-            ya = self.mcas[i][515:575]
+            ya = self.mcas[i][570:620]
             xa = linspace(0, len(ya)-1, len(ya))
             popt, pcov = curve_fit(self.funcGaussian, xa, ya)
             cur_y = self.funcGaussian(xa, popt[0], popt[1], popt[2])
-            self.mcas[i][515:575] = cur_y[0:60]
-
+            self.mcas[i][570:620] = cur_y[0:60]
             i += 1
         '''
 
@@ -225,7 +224,8 @@ class MyDynamicMplCanvas(MyMplCanvas):
         self.fig.canvas.draw()
         self.fig.canvas.flush_events()
 
-        avgMca = 0.0 # TODO: this 'avgMca' value dose not include deadtime correction
+        # TODO: this 'avgMca' value dose not include deadtime correction
+        avgMca = 0.0
         for i in range(0, self.numOfElement, 1):
             avgMca = avgMca + sum(self.mcas[i][int(self.lowROI.pos):int(self.highROI.pos)])
         avgMca /= self.numOfElement
@@ -233,7 +233,6 @@ class MyDynamicMplCanvas(MyMplCanvas):
         self.procStart.emit(avgMca)
 
     def callback(self):
-        # TODO: implement cursor freez of min/max use self.lowROI.get_xbound()
         if self.lowROI.pos < 0 or None:
             self.lowROI.line.set_xdata(10)
             self.lowROI.pos = 10
@@ -246,10 +245,7 @@ class MyDynamicMplCanvas(MyMplCanvas):
 
         self.axes.figure.canvas.draw()
 
-
-    #
-    # --------------------------------------------------------------
-    #
+    # gaussiian fitting for test. but not use gaussian fitting. it is test only.
     def funcGaussian(self, x, amp, cen, wid):
         return amp * exp(-(x - cen)**2 / (2 * wid**2))
 
@@ -295,6 +291,9 @@ class ApplicationWindow(QtGui.QMainWindow):
 
             # -----------------------------------------------------------------------------
             dock = QtGui.QDockWidget("Values")
+            # not use close 'x'
+            dock.setFeatures(QtGui.QDockWidget.DockWidgetMovable |
+                             QtGui.QDockWidget.DockWidgetFloatable)
             self.addDockWidget(Qt.RightDockWidgetArea, dock)
             sliders = QtGui.QWidget()
             sliders_grid = QtGui.QGridLayout(sliders)
