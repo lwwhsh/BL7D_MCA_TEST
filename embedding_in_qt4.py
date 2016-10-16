@@ -295,6 +295,9 @@ class ApplicationWindow(QtGui.QMainWindow):
 
             # -----------------------------------------------------------------------------
             dock = QtGui.QDockWidget("Values")
+            # not use close 'x'
+            dock.setFeatures(QtGui.QDockWidget.DockWidgetMovable |
+                             QtGui.QDockWidget.DockWidgetFloatable)
             self.addDockWidget(Qt.RightDockWidgetArea, dock)
             sliders = QtGui.QWidget()
             sliders_grid = QtGui.QGridLayout(sliders)
