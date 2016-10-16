@@ -1,6 +1,7 @@
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 
 from PyQt4 import QtCore, QtGui
+
 
 class widgetB(QtGui.QWidget):
     procDone = QtCore.pyqtSignal(str)
@@ -25,6 +26,7 @@ class widgetB(QtGui.QWidget):
         self.lineEdit.setText("From A: " + message)
 
         self.raise_()
+
 
 class widgetA(QtGui.QWidget):
     procStart = QtCore.pyqtSignal(str)

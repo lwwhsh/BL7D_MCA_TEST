@@ -358,8 +358,8 @@ class ApplicationWindow(QtGui.QMainWindow):
 
     def about(self):
         QtGui.QMessageBox.about(self, "About",
-                                """embedding_in_qt4.py example
-Copyright 2016 WoulWoo Lee.
+                                """Original file are embedding_in_qt4.py example
+Copyright 2016, modify for mca WoulWoo Lee.
 
 This program is a simple mca monitoring of CANBERRA 7Ge DXP detector.
 use Qt4 application embedding matplotlib canvases.
