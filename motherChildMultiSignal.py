@@ -1,3 +1,5 @@
+# -*- coding:utf-8 -*-
+
 from multiprocessing import Process, Queue, Pipe
 from threading import Thread
 import sys
