@@ -79,7 +79,12 @@ class ProcessPlotter(object):
         n = len(self.fig.axes)
         for i in range(n):
             pylab.sca(self.fig.axes[i])
-            plotterLegend = pylab.legend(loc='upper left', bbox_to_anchor=(1, 0.5), borderaxespad=1, fancybox=False, shadow=False, prop={'size':8})
+            plotterLegend = pylab.legend(loc='upper left',
+                                         bbox_to_anchor=(1, 0.5),
+                                         borderaxespad=1,
+                                         fancybox=False,
+                                         shadow=False,
+                                         prop={'size':8})
 
     def __updateAxis(self, params):
         ax = params['axis']
@@ -94,7 +99,9 @@ class ProcessPlotter(object):
         n = len(self.fig.axes)
         for i in range(n):
             box = self.fig.axes[i].get_position()
-            self.fig.axes[i].set_position([box.x0, box.y0, box.width * factor_shrink_axis, box.height])
+            self.fig.axes[i].set_position([box.x0, box.y0,
+                                           box.width * factor_shrink_axis,
+                                           box.height])
 
     def poll_draw(self):
         def call_back(arg=None):
@@ -186,7 +193,8 @@ class Plotter(object):
             Title of the plot
         daemon : `bool`
             This parameters indicates if the spawned process should be daemon or not
-            In general if daemon is set to **True** as the script ends it will close the graph, otherwise the script will end only when the graph is closed
+            In general if daemon is set to **True** as the script ends it will close the graph,
+            otherwise the script will end only when the graph is closed
         """
         self.plotsCount = 0
         # LWW, ctx = multiprocessing.get_context('spawn')  # @UndefinedVariable
@@ -207,7 +215,8 @@ class Plotter(object):
         self.plot_process.daemon = daemon
         self.plot_process.start()
 
-        # Setting a lower priority to the graphic process (it should be between -20 and 19, but we only set it between 0 and 19)
+        # Setting a lower priority to the graphic process
+        # (it should be between -20 and 19, but we only set it between 0 and 19)
         if (priority >= 0 and priority <= 19):
             # LWW, os.setpriority(os.PRIO_PROCESS, self.plot_process.pid, priority)
             pass
@@ -215,9 +224,11 @@ class Plotter(object):
     def isPlotterAlive(self):
         return self.plot_process.is_alive()
 
-    def createAxis(self, title = '', label = '', xlabel = '', ylabel = '', grid=True, line_style='-', line_marker='o', line_color='red', parent=None):
+    def createAxis(self, title = '', label = '', xlabel = '', ylabel = '', grid=True,
+                   line_style='-', line_marker='o', line_color='red', parent=None):
         """
-        Creates a subplot in the plotter, also it's possible to create an axis to a parent subplot through the **parent** parameter
+        Creates a subplot in the plotter, also it's possible to create
+        an axis to a parent subplot through the **parent** parameter
         Parameters
         ----------
         title : `string`
@@ -231,9 +242,11 @@ class Plotter(object):
         grid : `bool`
             If `True`, will render grid to the graph area.
         lineStyle : `string`
-            The line style according to `Matplotlib Line2D style list <http://matplotlib.org/api/lines_api.html#matplotlib.lines.Line2D.set_linestyle>`_
+            The line style according to `Matplotlib Line2D style list
+            <http://matplotlib.org/api/lines_api.html#matplotlib.lines.Line2D.set_linestyle>`_
         lineMarker : `string`
-            The line marker according to `Matplotlib Markers list <http://matplotlib.org/api/markers_api.html#module-matplotlib.markers>`_
+            The line marker according to `Matplotlib Markers list
+             <http://matplotlib.org/api/markers_api.html#module-matplotlib.markers>`_
         lineColor : `string`
             The line color, accepts any matplotlib color
         parent : `int`
@@ -340,10 +353,16 @@ def main2():
 
     pl1 = Plotter('Plot Norm', daemon=True)
 
-    pl.createAxis(title="Energy Scan", xlabel="Energy", ylabel="I0", grid=True, line_style="--", line_marker="x", line_color="blue", label="I0")
-    pl.createAxis(title="", xlabel="Energy", ylabel="Sample", grid=True, line_style=":", line_marker="o", line_color="black", label="Sample")
-    pl1.createAxis(title="", xlabel="Foo", ylabel="Bar", grid=True, label="No Label")
-    pl1.createAxis(title="", xlabel="Energy", ylabel="Norm", grid=True, label="1")
+    pl.createAxis(title="Energy Scan", xlabel="Energy", ylabel="I0",
+                  grid=True, line_style="--", line_marker="x",
+                  line_color="blue", label="I0")
+    pl.createAxis(title="", xlabel="Energy", ylabel="Sample",
+                  grid=True, line_style=":", line_marker="o",
+                  line_color="black", label="Sample")
+    pl1.createAxis(title="", xlabel="Foo", ylabel="Bar",
+                   grid=True, label="No Label")
+    pl1.createAxis(title="", xlabel="Energy", ylabel="Norm",
+                   grid=True, label="1")
 
     prnt = 2
     idx = 2
