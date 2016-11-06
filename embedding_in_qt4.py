@@ -91,6 +91,8 @@ class MyStaticMplCanvas(MyMplCanvas):
     def RepeatEraseStart(self, e):
         self.repeated = e
         if self.repeated == 2:
+            # for test.
+            time.sleep(0.25)
             self.dxpStartPV.put(1)
 
 
@@ -178,6 +180,8 @@ class MyDynamicMplCanvas(MyMplCanvas):
             # print 'Acquiring...', time.ctime()
             return
         self.mcas = []
+        # for test
+        time.sleep(0.5)
         for i in self.dxpMcaPVs :
             self.mcas.append(i.get())
 
@@ -339,12 +343,10 @@ class ApplicationWindow(QtGui.QMainWindow):
             self.dc.highROIChanged.connect(self.dispHighROI.setText)
 
             dock.setWidget(sliders)
-            # -----------------------------------------------------------------------------
 
-            # self.statusBar().showMessage("All hail matplotlib!", 2000)
-            dispStatus = QtGui.QLabel(" BL7D dxpXMAP monitoring | normal")
-            self.statusBar().addWidget(dispStatus)
+            self.statusBar().showMessage("BL7D dxpXMAP monitoring")
 
+            # CONNECTIONS.
             # connect average value to chart in sc instance
             self.dc.procStart.connect(sc.computer_sum)
             # Checkbox connect for EraseStart again
