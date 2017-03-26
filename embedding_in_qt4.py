@@ -293,7 +293,7 @@ class ApplicationWindow(QtGui.QMainWindow):
             self.main_widget.setFocus()
             self.setCentralWidget(self.main_widget)
 
-            # -----------------------------------------------------------------------------
+            # --------------------------------------------------------------------------
             dock = QtGui.QDockWidget("Values")
             # not use close 'x'
             dock.setFeatures(QtGui.QDockWidget.DockWidgetMovable |

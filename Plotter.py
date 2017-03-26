@@ -201,17 +201,9 @@ class Plotter(object):
         ctx = multiprocessing.Pool()  # @UndefinedVariable
         # LWW, self.plot_queue = ctx.Queue()
         self.plot_queue = multiprocessing.Queue()
-
-
-
-
-
         self.plotter = ProcessPlotter()
         # LWW self.plot_process = ctx.Process(target=self.plotter, args=(self.plot_queue, title))
         self.plot_process = ctx.Process(target=self.plotter, args=(self.plot_queue, title))
-
-
-
         self.plot_process.daemon = daemon
         self.plot_process.start()
 
@@ -414,4 +406,4 @@ def main():
     input()
 
 if __name__ == '__main__':
-    main2()
+    main()
